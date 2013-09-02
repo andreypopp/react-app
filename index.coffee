@@ -79,7 +79,7 @@ sendScript = (routes, {root}) ->
 
     b = browserify()
       .transform('reactify')
-      .require('./__bootstrap')
+      .require('./bootstrap')
 
     for _, module of routes
       filename = if module[0] == '.'
