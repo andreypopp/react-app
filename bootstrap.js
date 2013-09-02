@@ -40,7 +40,8 @@ module.exports = function(routes) {
       }
     },
 
-    onPopState: function() {
+    onPopState: function(e) {
+      e.preventDefault();
       var path = window.location.pathname,
           query = qs.parse(window.location.search.slice(1));
       this.loadURL(path, query);
