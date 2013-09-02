@@ -28,6 +28,8 @@ _genServerRenderingCode = (module, props) ->
 renderComponent = (module, props, root) ->
   module = path.resolve(root, module) if module[0] == '.'
   code = _genServerRenderingCode(module, props)
+  # XXX: passing require down to contextify makes module cache shared, not sure
+  # if it's a good thing
   context = {result: null, require: require}
 
   contextify  = require 'contextify'
