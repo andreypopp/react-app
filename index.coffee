@@ -42,7 +42,7 @@ _insertScriptTag = (rendered, routes, src) ->
     <script src="#{src}"></script>
     <script>
       var __reactAppRoutes = #{JSON.stringify(routes)};
-      var __bootstrap = require('./__bootstrap');
+      var __bootstrap = require('./bootstrap');
       for (var __bootstrapKey in __reactAppRoutes) {
         __reactAppRoutes[__bootstrapKey] = require(__reactAppRoutes[__bootstrapKey]);
       }
