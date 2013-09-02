@@ -3,41 +3,54 @@ module.exports = function(routes) {
       ReactMount = require('react-tools/build/modules/ReactMount'),
       React = require('react-tools/build/modules/React'),
       Router = require('./router'),
-      router = new Router(routes);
+      topLevelComponent = null;
 
   ReactMount.allowFullPageRender = true;
 
   var TopLevelComponent = React.createClass({
+
+    componentDidMount: function() {
+      window.addEventListener('popstate', this.loadURL);
+    },
+
+    componentWillUnmount: function() {
+      window.removeEventListener('popstate', this.loadURL);
+    },
+
+    activeComponent: function() {
+      var match = this.props.router.match(window.location.pathname);
+      if (match) {
+        request = {
+          path: window.location.pathname,
+          query: qs.parse(window.location.search.slice(1)),
+          params: match.params
+        }
+        return match.handler(request);
+      }
+    },
+
+    loadURL: function() {
+      this.setState({component: this.activeComponent()});
+    },
+
+    getInitialState: function() {
+      return {component: this.activeComponent()};
+    },
+
     render: function() {
-      return this.props.component;
+      return this.state.component;
     }
   });
 
-  var topLevelComponent = null;
-
-  function loadURL() {
-    var match = router.match(window.location.pathname);
-    if (match) {
-      request = {
-        path: window.location.pathname,
-        query: qs.parse(window.location.search.slice(1)),
-        params: match.params
-      }
-      var component = match.handler(request);
-      if (topLevelComponent) {
-        topLevelComponent.setProps({component: component});
-      } else {
-        topLevelComponent = React.renderComponent(
-          TopLevelComponent({component: component}),
-          document);
-      }
-    }
-  }
+  window.addEventListener('DOMContentLoaded', function() {
+    topLevelComponent = React.renderComponent(
+      TopLevelComponent({router: new Router(routes)}),
+      document);
+  });
 
   window.history.navigate = function(url) {
     window.history.pushState(null, '', url);
-    loadURL();
+    topLevelComponent.loadURL();
   }
 
-  window.addEventListener('popstate', loadURL);
 };
