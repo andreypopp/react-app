@@ -2,6 +2,9 @@ BIN = ./node_modules/.bin
 SRC = $(wildcard *.coffee)
 LIB = $(SRC:%.coffee=%.js)
 
+example:
+	coffee example.coffee
+
 build: $(LIB)
 
 clean:

@@ -7,18 +7,16 @@
 ###
 
 path                    = require 'path'
-{resolve}               = require 'kew'
 express                 = require 'express'
 
 browserify              = require 'browserify'
-reactify                = require 'reactify'
 
+_nowWeCanRequireJSX     = require './require_jsx'
 Router                  = require './router'
 {getCaller}             = require './utils'
 
 _genServerRenderingCode = (module, props) ->
   """
-  require('./require_jsx');
   var React = require('react-tools/build/modules/React');
   var Component = require('#{module}');
   React.renderComponentToString(
@@ -80,7 +78,7 @@ sendScript = (routes, {root}) ->
     res.setHeader 'Content-Type', 'application/json'
 
     b = browserify()
-      .transform(reactify)
+      .transform('reactify')
       .require('./__bootstrap')
 
     for _, module of routes

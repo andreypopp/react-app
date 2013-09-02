@@ -18,13 +18,12 @@
     "react-tools": "git+https://github.com/facebook/react#master",
     "url-pattern": "~0.2.1",
     "contextify": "~0.1.6",
-    "underscore": "~1.5.1",
-    "supertest": "~0.7.1",
-    "kew": "~0.1.7"
+    "underscore": "~1.5.1"
   },
   "devDependencies": {
     "coffee-script": "*",
-    "mocha": "*"
+    "mocha": "*",
+    "supertest": "0.x.x"
   },
   "keywords": [
     "react",
