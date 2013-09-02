@@ -1,0 +1,40 @@
+{
+  "name": "react-app",
+  "version": "0.0.0",
+  "description": "Server side rendering for React apps with Express",
+  "main": "index",
+  "transform": "coffeeify",
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andreypopp/react-app.git"
+  },
+  "dependencies": {
+    "express": "3.x.x",
+    "browserify": "2.x.x",
+    "reactify": "git+https://github.com/andreypopp/reactify#master",
+    "react-tools": "git+https://github.com/facebook/react#master",
+    "url-pattern": "~0.2.1",
+    "contextify": "~0.1.6",
+    "underscore": "~1.5.1",
+    "supertest": "~0.7.1",
+    "kew": "~0.1.7"
+  },
+  "devDependencies": {
+    "coffee-script": "*",
+    "mocha": "*"
+  },
+  "keywords": [
+    "react",
+    "browser",
+    "browserify",
+    "express",
+    "connect",
+    "server-side",
+    "ui"
+  ],
+  "author": "Andrey Popp <8mayday@gmail.com>",
+  "license": "MIT"
+}
