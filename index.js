@@ -27,10 +27,6 @@ function _genServerRenderingCode(module, props) {
 function _genClientRoutingCode(handler, request, routes) {
   return [
     "<script>",
-      "var __DOMLoaded = false;",
-      "window.addEventListener('DOMContentLoaded', function() {",
-      " __DOMLoaded = true;",
-      "});",
       "var __bootstrap = function() {",
         "var handler = require(" + JSON.stringify(handler) + ");",
         "var request = " + JSON.stringify(request) + ";",
@@ -39,7 +35,7 @@ function _genClientRoutingCode(handler, request, routes) {
         "for (var key in routes) {",
         "  routes[key] = require(routes[key]);",
         "}",
-        "bootstrap(handler, request, routes, __DOMLoaded);",
+        "bootstrap(handler, request, routes);",
       "};",
     "</script>"
   ].join('\n');

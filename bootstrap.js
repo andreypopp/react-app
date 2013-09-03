@@ -8,13 +8,13 @@ var extend = require('underscore').extend,
     React = require('react-tools/build/modules/React'),
     Router = require('./router');
 
-module.exports = function(component, request, routes, DOMLoaded) {
+module.exports = function(component, request, routes) {
   var topLevelComponent = null,
       props = extend(request, {router: new Router(routes)});
 
   ReactMount.allowFullPageRender = true;
 
-  if (DOMLoaded) {
+  if (document.readyState == 'interactive') {
     React.renderComponent(component(props), document);
   } else {
     window.addEventListener('DOMContentLoaded', function() {
