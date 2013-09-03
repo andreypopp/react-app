@@ -1,20 +1,13 @@
 BIN = ./node_modules/.bin
-SRC = $(wildcard *.coffee)
-LIB = $(SRC:%.coffee=%.js)
 
 example:
-	coffee example.coffee
-
-build: $(LIB)
-
-clean:
-	rm -f $(LIB)
+	node example.js
 
 install link:
 	@npm $@
 
 test:
-	@$(BIN)/mocha -b -R spec --compilers coffee:coffee-script ./specs/*.coffee
+	@$(BIN)/mocha -b -R spec ./specs/*.js
 
 release-patch: test
 	@$(call release,patch)
