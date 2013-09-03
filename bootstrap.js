@@ -65,7 +65,7 @@ module.exports = function(routes) {
   window.addEventListener('DOMContentLoaded', function() {
     topLevelComponent = React.renderComponent(
       TopLevelComponent({router: new Router(routes)}),
-      document.body);
+      document);
   });
 
   window.history.navigate = function(path, query) {
