@@ -6,11 +6,11 @@
   2013 (c) Andrey Popp <8mayday@gmail.com>
 */
 
-var __slice = [].slice;
-
 var path = require('path'),
     express = require('express'),
+    extend = require('underscore').extend,
     browserify = require('browserify'),
+    defer = require('kew').defer,
     _nowWeCanRequireJSX = require('./require_jsx'),
     Router = require('./router'),
     getCaller = require('./utils').getCaller;
@@ -42,18 +42,12 @@ function _genClientRoutingCode(handler, request, routes) {
   ].join('\n');
 };
 
-function renderComponent(module, props, root) {
-  if (module[0] === '.') {
-    module = path.resolve(root, module);
-  }
-  var code = _genServerRenderingCode(module, props);
-  var context = {
-    result: null,
-    require: require
-  };
+function renderComponent(bundle, module, props) {
+  var context = {result: null};
   var contextify = require('contextify');
   contextify(context);
-  context.run(code);
+  context.run(bundle);
+  context.run(_genServerRenderingCode(module, props));
   context.dispose();
   return context.result;
 };
@@ -67,7 +61,7 @@ function _insertScriptTag(markup, tag) {
   }
 };
 
-function sendPage(routes, root) {
+function sendPage(routes, getBundle) {
   return function(req, res, next) {
     var router = new Router(routes),
         match = router.match(req.path);
@@ -82,44 +76,54 @@ function sendPage(routes, root) {
       params: match.params
     };
 
-    try {
-      var rendered = renderComponent(match.handler, request, root);
-      rendered = _insertScriptTag(rendered,
-        '<script src="/__script__"></script>' +
-        _genClientRoutingCode(match.handler, request, routes));
-      return res.send(rendered);
-    } catch (e) {
-      return next(e);
-    }
+    getBundle()
+      .then(function(result) {
+        var rendered = renderComponent(result, match.handler, request);
+        rendered = _insertScriptTag(rendered,
+          '<script src="/__script__"></script>' +
+          _genClientRoutingCode(match.handler, request, routes));
+        return res.send(rendered);
+      }).fail(next);
   };
 };
 
-function sendScript(routes, root) {
+function computeBundle(routes, root) {
+  var promise = defer(),
+      b = browserify()
+          .transform('reactify')
+          .require('react-tools/build/modules/React')
+          .require('./bootstrap');
+
+  for (var k in routes) {
+    b.require(
+      (routes[k][0] === '.' ? path.resolve(root, routes[k]) : routes[k]),
+      {expose: routes[k]});
+  }
+
+  b.bundle({debug: true}, promise.makeNodeResolver());
+  return promise;
+}
+
+function sendScript(getBundle) {
   return function(req, res, next) {
-    var filename, module;
     res.setHeader('Content-Type', 'application/json');
-    var b = browserify().transform('reactify').require('./bootstrap');
-    for (var k in routes) {
-      module = routes[k];
-      filename = module[0] === '.' ? path.resolve(root, module) : module;
-      b.require(filename, {expose: module});
-    }
-    return b.bundle({debug: true}, function(err, result) {
-      if (err) {
-        next(err);
-      } else {
-        res.send(result);
-      }
-    });
+    getBundle()
+      .then(function(result) { res.send(result) })
+      .fail(next);
   };
 };
 
 module.exports = function(routes) {
-  var root = path.dirname(getCaller());
-  var app = express();
+  var root = path.dirname(getCaller()),
+      app = express(),
+      bundle = null,
+      generateBundle = function() { bundle = computeBundle(routes, root); },
+      getBundle = function() { return bundle; };
 
-  app.get('/__script__', sendScript(routes, root));
-  app.use(sendPage(routes, root));
+  generateBundle();
+
+  app.get('/__script__', sendScript(getBundle));
+  app.use(sendPage(routes, getBundle));
 
   return app;
 };

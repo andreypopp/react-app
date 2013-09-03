@@ -17,7 +17,8 @@
     "react-tools": "git+https://github.com/facebook/react#master",
     "url-pattern": "~0.2.1",
     "contextify": "~0.1.6",
-    "underscore": "~1.5.1"
+    "underscore": "~1.5.1",
+    "kew": "~0.1.7"
   },
   "devDependencies": {
     "mocha": "*",
