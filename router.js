@@ -1,7 +1,8 @@
-/*
-
-  2013 (c) Andrey Popp <8mayday@gmail.com>
-*/
+/**
+ * Basic router.
+ *
+ * 2013 (c) Andrey Popp <8mayday@gmail.com>
+ */
 
 var toPattern = require('url-pattern');
 

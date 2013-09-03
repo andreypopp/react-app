@@ -1,3 +1,9 @@
+/**
+ * Random utilities.
+ *
+ * 2013 (c) Andrey Popp <8mayday@gmail.com>
+ */
+
 function getCaller() {
   var frame,
       stack = getStack();

@@ -1,3 +1,9 @@
+/**
+ * Page abstraction which empowers native <html> component with window.location
+ * tracking and navigation routines.
+ *
+ * 2013 (c) Andrey Popp <8mayday@gmail.com>
+ */
 var qs = require('querystring'),
     isEqual = require('underscore').isEqual,
     React = require('react-tools/build/modules/React');
