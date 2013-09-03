@@ -1,5 +1,4 @@
-var qs = require('querystring'),
-    extend = require('underscore').extend,
+var extend = require('underscore').extend,
     ReactMount = require('react-tools/build/modules/ReactMount'),
     React = require('react-tools/build/modules/React'),
     Router = require('./router');
