@@ -3,13 +3,17 @@ var extend = require('underscore').extend,
     React = require('react-tools/build/modules/React'),
     Router = require('./router');
 
-module.exports = function(component, request, routes) {
-  var topLevelComponent = null;
+module.exports = function(component, request, routes, DOMLoaded) {
+  var topLevelComponent = null,
+      props = extend(request, {router: new Router(routes)});
 
   ReactMount.allowFullPageRender = true;
 
-  window.addEventListener('DOMContentLoaded', function() {
-    var props = extend(request, {router: new Router(routes)});
+  if (DOMLoaded) {
     React.renderComponent(component(props), document);
-  });
+  } else {
+    window.addEventListener('DOMContentLoaded', function() {
+      React.renderComponent(component(props), document);
+    });
+  }
 };

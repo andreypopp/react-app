@@ -29,7 +29,11 @@ function _genServerRenderingCode(module, props) {
 function _genClientRoutingCode(handler, request, routes) {
   return [
     "<script>",
-      "(function() {",
+      "var __DOMLoaded = false;",
+      "window.addEventListener('DOMContentLoaded', function() {",
+      " __DOMLoaded = true;",
+      "});",
+      "var __bootstrap = function() {",
         "var handler = require(" + JSON.stringify(handler) + ");",
         "var request = " + JSON.stringify(request) + ";",
         "var routes = " + JSON.stringify(routes) + ";",
@@ -37,8 +41,8 @@ function _genClientRoutingCode(handler, request, routes) {
         "for (var key in routes) {",
         "  routes[key] = require(routes[key]);",
         "}",
-        "bootstrap(handler, request, routes);",
-      "})();",
+        "bootstrap(handler, request, routes, __DOMLoaded);",
+      "};",
     "</script>"
   ].join('\n');
 };
@@ -102,8 +106,8 @@ function sendPage(routes, getBundle) {
       .then(function(result) {
         var rendered = renderComponent(result, match.handler, request);
         rendered = _insertScriptTag(rendered,
-          '<script src="/__script__"></script>' +
-          _genClientRoutingCode(match.handler, request, routes));
+          _genClientRoutingCode(match.handler, request, routes) +
+          '<script async onload="__bootstrap();" src="/__script__"></script>')
         return res.send(rendered);
       }).fail(next);
   };
