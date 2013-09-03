@@ -25,6 +25,20 @@ _genServerRenderingCode = (module, props) ->
   );
   """
 
+_genClientCode = (handler, request, routes) ->
+  """
+    <script>
+      var __reactAppHandler = require(#{JSON.stringify(handler)});
+      var __reactAppRequest = #{JSON.stringify(request)};
+      var __reactAppRoutes = #{JSON.stringify(routes)};
+      var __bootstrap = require('./bootstrap');
+      for (var __bootstrapKey in __reactAppRoutes) {
+        __reactAppRoutes[__bootstrapKey] = require(__reactAppRoutes[__bootstrapKey]);
+      }
+      __bootstrap(__reactAppHandler, __reactAppRequest, __reactAppRoutes);
+    </script>
+  """
+
 renderComponent = (module, props, root) ->
   module = path.resolve(root, module) if module[0] == '.'
   code = _genServerRenderingCode(module, props)
@@ -39,23 +53,13 @@ renderComponent = (module, props, root) ->
   context.dispose()
   context.result
 
-_insertScriptTag = (rendered, routes, src) ->
-  script = """
-    <script src="#{src}"></script>
-    <script>
-      var __reactAppRoutes = #{JSON.stringify(routes)};
-      var __bootstrap = require('./bootstrap');
-      for (var __bootstrapKey in __reactAppRoutes) {
-        __reactAppRoutes[__bootstrapKey] = require(__reactAppRoutes[__bootstrapKey]);
-      }
-      __bootstrap(__reactAppRoutes);
-    </script>
-  """
+_insertScriptTag = (rendered, scripts...) ->
+  scripts = scripts.join('\n')
   index = rendered.indexOf('</html>')
   if index > -1
-    rendered.slice(0, index) + script + rendered.slice(index)
+    rendered.slice(0, index) + scripts + rendered.slice(index)
   else
-    rendered + script
+    rendered + scripts
 
 sendPage = (routes, {root}) ->
   (req, res, next) ->
@@ -70,7 +74,9 @@ sendPage = (routes, {root}) ->
 
     try
       rendered = renderComponent(match.handler, request, root)
-      rendered = _insertScriptTag rendered, routes, '/__script__'
+      rendered = _insertScriptTag(rendered,
+        '<script src="/__script__"></script>',
+        _genClientCode(match.handler, request, routes))
       res.send rendered
     catch e
       next e
