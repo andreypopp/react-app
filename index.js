@@ -10,6 +10,7 @@ var path = require('path'),
     express = require('express'),
     extend = require('underscore').extend,
     browserify = require('browserify'),
+    watchify = require('watchify'),
     defer = require('kew').defer,
     _nowWeCanRequireJSX = require('./require_jsx'),
     Router = require('./router'),
@@ -87,23 +88,6 @@ function sendPage(routes, getBundle) {
   };
 };
 
-function computeBundle(routes, root) {
-  var promise = defer(),
-      b = browserify()
-          .transform('reactify')
-          .require('react-tools/build/modules/React')
-          .require('./bootstrap');
-
-  for (var k in routes) {
-    b.require(
-      (routes[k][0] === '.' ? path.resolve(root, routes[k]) : routes[k]),
-      {expose: routes[k]});
-  }
-
-  b.bundle({debug: true}, promise.makeNodeResolver());
-  return promise;
-}
-
 function sendScript(getBundle) {
   return function(req, res, next) {
     res.setHeader('Content-Type', 'application/json');
@@ -113,21 +97,52 @@ function sendScript(getBundle) {
   };
 };
 
-module.exports = function(routes) {
+module.exports = function(routes, options) {
   var root = path.dirname(getCaller()),
       app = express(),
-      bundle = null,
-      generateBundle = function() {
-        bundle = computeBundle(routes, root);
-      },
-      getBundle = function() {
-        return bundle;
-      };
+      bundle = browserify(),
+      bundlePromise = null;
 
-  generateBundle();
+  options = options || {};
+
+  function computeBundle() {
+    var promise = defer();
+    bundle.bundle({debug: options.debug}, promise.makeNodeResolver());
+    return promise;
+  };
+
+  function updateBundle() {
+    bundlePromise = computeBundle();
+  };
+
+  function getBundle() {
+    return bundlePromise;
+  };
+
+  bundle
+    .transform('reactify')
+    .require('react-tools/build/modules/React')
+    .require('./bootstrap');
+
+  for (var k in routes) {
+    bundle.require(
+      (routes[k][0] === '.' ? path.resolve(root, routes[k]) : routes[k]),
+      {expose: routes[k]});
+  }
+
+  if (options.configureBundle) {
+    bundle = options.configureBundle(bundle);
+  }
+
+  if (options.debug) {
+    watchify(bundle).on('update', updateBundle);
+  }
+
+  updateBundle();
 
   app.get('/__script__', sendScript(getBundle));
   app.use(sendPage(routes, getBundle));
 
   return app;
+
 };

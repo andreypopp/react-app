@@ -18,7 +18,8 @@
     "url-pattern": "~0.2.1",
     "contextify": "~0.1.6",
     "underscore": "~1.5.1",
-    "kew": "~0.1.7"
+    "kew": "~0.1.7",
+    "watchify": "~0.1.0"
   },
   "devDependencies": {
     "mocha": "*",
