@@ -12,7 +12,6 @@ var path = require('path'),
     browserify = require('browserify'),
     watchify = require('watchify'),
     defer = require('kew').defer,
-    _nowWeCanRequireJSX = require('./require_jsx'),
     Router = require('./router'),
     getCaller = require('./utils').getCaller;
 
