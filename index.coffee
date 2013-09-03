@@ -25,7 +25,7 @@ _genServerRenderingCode = (module, props) ->
   );
   """
 
-_genClientCode = (handler, request, routes) ->
+_genClientRoutingCode = (handler, request, routes) ->
   """
     <script>
       var __reactAppHandler = require(#{JSON.stringify(handler)});
@@ -76,7 +76,7 @@ sendPage = (routes, {root}) ->
       rendered = renderComponent(match.handler, request, root)
       rendered = _insertScriptTag(rendered,
         '<script src="/__script__"></script>',
-        _genClientCode(match.handler, request, routes))
+        _genClientRoutingCode(match.handler, request, routes))
       res.send rendered
     catch e
       next e
