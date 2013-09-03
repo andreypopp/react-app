@@ -43,6 +43,14 @@ function _genClientRoutingCode(handler, request, routes) {
   ].join('\n');
 };
 
+/**
+ * Render React component into string.
+ *
+ * @param {String} bundle Computed browserify bundle which serves as environment
+ * @param {String} module Module name which points to React component to render
+ * @param {Object} props Component props to use
+ * @returns {String} Rendered React component
+ */
 function renderComponent(bundle, module, props) {
   var context = {result: null};
   var contextify = require('contextify');
@@ -53,6 +61,13 @@ function renderComponent(bundle, module, props) {
   return context.result;
 };
 
+/**
+ * Insert <script> tag into markup.
+ *
+ * @param {String} markup Markup to insert script tag into
+ * @param {String} tag Script tag to insert
+ * @returns {String} Markup with inserted script tags
+ */
 function _insertScriptTag(markup, tag) {
   var index = markup.indexOf('</html>');
   if (index > -1) {
@@ -62,6 +77,12 @@ function _insertScriptTag(markup, tag) {
   }
 };
 
+/**
+ * Send a page a currently active React component as HTML.
+ *
+ * @param {routes} routes Route table
+ * @param {function} getBundle Returns a promise for a computed bundle
+ */
 function sendPage(routes, getBundle) {
   return function(req, res, next) {
     var router = new Router(routes),
@@ -88,6 +109,11 @@ function sendPage(routes, getBundle) {
   };
 };
 
+/**
+ * Send computed script bundle.
+ *
+ * @param {function} getBundle returns a promise for a computed bundle
+ */
 function sendScript(getBundle) {
   return function(req, res, next) {
     res.setHeader('Content-Type', 'application/json');
@@ -97,6 +123,22 @@ function sendScript(getBundle) {
   };
 };
 
+/**
+ * Construct express application which serves rendered React components as HTML
+ * and corresponding client code.
+ *
+ * Route table should be in form of {route pattern: node module id}.
+ *
+ * Available option keys are:
+ *
+ *  - `configureBundle` configures browserify bundle
+ *  - `debug` inserts source maps into bundle and starts watching for source
+ *    code changes
+ *
+ * @param {Object} routes Route table
+ * @param {Object} options Options
+ * @retuens {Object} Configured express application
+ */
 module.exports = function(routes, options) {
   var root = path.dirname(getCaller()),
       app = express(),
