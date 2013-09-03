@@ -117,8 +117,12 @@ module.exports = function(routes) {
   var root = path.dirname(getCaller()),
       app = express(),
       bundle = null,
-      generateBundle = function() { bundle = computeBundle(routes, root); },
-      getBundle = function() { return bundle; };
+      generateBundle = function() {
+        bundle = computeBundle(routes, root);
+      },
+      getBundle = function() {
+        return bundle;
+      };
 
   generateBundle();
 
