@@ -1,7 +1,7 @@
 /**
  * Express application for serving rendered React components and corresponding
  * client code.
- * 
+ *
  * 2013 (c) Andrey Popp <8mayday@gmail.com>
  */
 
@@ -158,6 +158,12 @@ module.exports = function(routes, options) {
   function getBundle() {
     return bundlePromise;
   };
+
+  if (options.transforms) {
+    options.transforms.forEach(function(transform) {
+      bundle.transform(transform);
+    });
+  }
 
   bundle
     .transform('reactify')
