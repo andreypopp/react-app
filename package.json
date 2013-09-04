@@ -13,7 +13,6 @@
   "dependencies": {
     "express": "3.x.x",
     "browserify": "2.x.x",
-    "reactify": "git+https://github.com/andreypopp/reactify#master",
     "url-pattern": "~0.2.1",
     "contextify": "~0.1.6",
     "underscore": "~1.5.1",
@@ -21,9 +20,12 @@
     "watchify": "~0.1.0"
   },
   "peerDependencies": {
-    "react-tools": "git+https://github.com/facebook/react#master"
+    "reactify": "git+https://github.com/andreypopp/reactify#master",
+    "react-tools": "http://data.andreypopp.com/react-tools-0.5.0-alpha.tgz"
   },
   "devDependencies": {
+    "reactify": "git+https://github.com/andreypopp/reactify#master",
+    "react-tools": "http://data.andreypopp.com/react-tools-0.5.0-alpha.tgz",
     "mocha": "*",
     "supertest": "0.x.x"
   },
