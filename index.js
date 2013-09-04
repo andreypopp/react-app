@@ -31,7 +31,7 @@ function _genClientRoutingCode(handler, request, routes) {
         "var handler = require(" + JSON.stringify(handler) + ");",
         "var request = " + JSON.stringify(request) + ";",
         "var routes = " + JSON.stringify(routes) + ";",
-        "var bootstrap = require('./bootstrap');",
+        "var bootstrap = require('react-app/bootstrap');",
         "for (var key in routes) {",
         "  routes[key] = require(routes[key]);",
         "}",
@@ -147,7 +147,10 @@ module.exports = function(routes, options) {
 
   function computeBundle() {
     var promise = defer();
-    bundle.bundle({debug: options.debug}, promise.makeNodeResolver());
+    bundle.bundle({debug: options.debug}, function(err, result) {
+      if (err) throw err;
+      promise.resolve(result);
+    });
     return promise;
   };
 
@@ -168,7 +171,8 @@ module.exports = function(routes, options) {
   bundle
     .transform('reactify')
     .require('react-tools/build/modules/React')
-    .require('./bootstrap');
+    .require(path.join(__dirname, './bootstrap'),
+      {expose: 'react-app/bootstrap'});
 
   for (var k in routes) {
     bundle.require(
