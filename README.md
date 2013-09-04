@@ -38,7 +38,7 @@ Now create `index_page` and `about_page` components:
     */
 
     var React = require('react-tools/build/modules/React'),
-        Page = require('../../page.js');
+        Page = require('react-app/page.js');
 
     module.exports = React.createClass({
       render: function() {
@@ -65,7 +65,7 @@ Now create `index_page` and `about_page` components:
     */
 
     var React = require('react-tools/build/modules/React'),
-        Page = require('../../page.js');
+        Page = require('react-app/page.js');
 
     module.exports = React.createClass({
       render: function() {
