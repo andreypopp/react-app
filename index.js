@@ -4,6 +4,7 @@
  *
  * 2013 (c) Andrey Popp <8mayday@gmail.com>
  */
+"use strict";
 
 var path = require('path'),
     express = require('express'),
@@ -21,7 +22,7 @@ function _genServerRenderingCode(module, props) {
     "Component(" + (JSON.stringify(props)) + "),",
     "function(str) { result = str; });"
   ].join('\n');
-};
+}
 
 function _genClientRoutingCode(handler, request, routes) {
   return [
@@ -38,7 +39,7 @@ function _genClientRoutingCode(handler, request, routes) {
       "};",
     "</script>"
   ].join('\n');
-};
+}
 
 /**
  * Render React component into string.
@@ -56,7 +57,7 @@ function renderComponent(bundle, module, props) {
   context.run(_genServerRenderingCode(module, props));
   context.dispose();
   return context.result;
-};
+}
 
 /**
  * Insert <script> tag into markup.
@@ -70,9 +71,9 @@ function _insertScriptTag(markup, tag) {
   if (index > -1) {
     return markup.slice(0, index) + tag + markup.slice(index);
   } else {
-    return markup + scripts;
+    return markup + tag;
   }
-};
+}
 
 /**
  * Send a page a currently active React component as HTML.
@@ -85,7 +86,7 @@ function sendPage(routes, getBundle) {
     var router = new Router(routes),
         match = router.match(req.path);
 
-    if (match == null) {
+    if (match === null) {
       return next();
     }
 
@@ -104,7 +105,7 @@ function sendPage(routes, getBundle) {
         return res.send(rendered);
       }).fail(next);
   };
-};
+}
 
 /**
  * Send computed script bundle.
@@ -118,7 +119,7 @@ function sendScript(getBundle) {
       .then(function(result) { res.send(result) })
       .fail(next);
   };
-};
+}
 
 /**
  * Construct express application which serves rendered React components as HTML
@@ -151,15 +152,15 @@ module.exports = function(routes, options) {
       promise.resolve(result);
     });
     return promise;
-  };
+  }
 
   function updateBundle() {
     bundlePromise = computeBundle();
-  };
+  }
 
   function getBundle() {
     return bundlePromise;
-  };
+  }
 
   if (options.transforms) {
     options.transforms.forEach(function(transform) {

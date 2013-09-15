@@ -3,6 +3,8 @@
  *
  * 2013 (c) Andrey Popp <8mayday@gmail.com>
  */
+"use strict";
+
 var ReactMount = require('react-tools/build/modules/ReactMount'),
     React = require('react-tools/build/modules/React'),
     Router = require('./router');
@@ -18,4 +20,4 @@ module.exports = function(component, props, routes) {
       React.renderComponent(component(props), document);
     });
   }
-};
+}

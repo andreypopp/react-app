@@ -9,6 +9,9 @@ install link:
 test:
 	@$(BIN)/mocha -b -R spec ./specs/*.js
 
+lint:
+	@$(BIN)/jshint *.js
+
 release-patch: test
 	@$(call release,patch)
 

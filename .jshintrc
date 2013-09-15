@@ -1,0 +1,18 @@
+{
+  "undef": true,
+  "unused": "vars",
+  "asi": true,
+  "expr": true,
+  "globalstrict": true,
+  "globals": {
+    "Buffer": false,
+    "require": false,
+    "process": false,
+    "module": false,
+    "exports": false,
+    "window": false,
+    "document": false,
+    "__dirname": false,
+    "__filename": false
+  }
+}

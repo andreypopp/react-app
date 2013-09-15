@@ -4,8 +4,9 @@
  *
  * 2013 (c) Andrey Popp <8mayday@gmail.com>
  */
+"use strict";
+
 var qs = require('querystring'),
-    isEqual = require('underscore').isEqual,
     React = require('react-tools/build/modules/React');
 
 /**
@@ -49,7 +50,7 @@ module.exports = React.createClass({
   activeContents: function(path, query) {
     var match = this.props.router.match(path);
     if (match) {
-      request = {
+      var request = {
         path: path,
         query: query,
         params: match.params

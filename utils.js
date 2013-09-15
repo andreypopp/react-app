@@ -3,6 +3,7 @@
  *
  * 2013 (c) Andrey Popp <8mayday@gmail.com>
  */
+"use strict";
 
 function getCaller() {
   var frame,
@@ -16,7 +17,7 @@ function getCaller() {
       return frame.receiver.filename;
     }
   }
-};
+}
 
 function getStack() {
   var origPrepareStackTrace = Error.prepareStackTrace;
@@ -25,7 +26,7 @@ function getStack() {
   var stack = err.stack;
   Error.prepareStackTrace = origPrepareStackTrace;
   return stack;
-};
+}
 
 module.exports = {
   getStack: getStack,
