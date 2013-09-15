@@ -7,7 +7,6 @@
 
 var path = require('path'),
     express = require('express'),
-    extend = require('underscore').extend,
     browserify = require('browserify'),
     watchify = require('watchify'),
     defer = require('kew').defer,

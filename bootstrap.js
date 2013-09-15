@@ -3,15 +3,12 @@
  *
  * 2013 (c) Andrey Popp <8mayday@gmail.com>
  */
-var extend = require('underscore').extend,
-    ReactMount = require('react-tools/build/modules/ReactMount'),
+var ReactMount = require('react-tools/build/modules/ReactMount'),
     React = require('react-tools/build/modules/React'),
     Router = require('./router');
 
-module.exports = function(component, request, routes) {
-  var topLevelComponent = null,
-      props = extend(request, {router: new Router(routes)});
-
+module.exports = function(component, props, routes) {
+  props.router = new Router(routes)
   ReactMount.allowFullPageRender = true;
 
   if (document.readyState == 'interactive') {
