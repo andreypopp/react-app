@@ -11,8 +11,8 @@ var path = require('path'),
     browserify = require('browserify'),
     watchify = require('watchify'),
     defer = require('kew').defer,
-    Router = require('./router'),
-    getCaller = require('./utils').getCaller;
+    callsite = require('callsite'),
+    Router = require('./router');
 
 function _genServerRenderingCode(module, props) {
   return [
@@ -138,7 +138,7 @@ function sendScript(getBundle) {
  * @retuens {Object} Configured express application
  */
 module.exports = function(routes, options) {
-  var root = path.dirname(getCaller()),
+  var root = path.dirname(callsite()[1].getFileName()),
       app = express(),
       bundle = browserify(),
       bundlePromise = null;
