@@ -11,7 +11,6 @@ var path = require('path'),
     defer = require('kew').defer,
     callsite = require('callsite'),
     XMLHttpRequest = require('xhr2');
-    aggregate = require('stream-aggregate-promise'),
     Bundler = require('./bundler'),
     Router = require('./router');
 
@@ -170,7 +169,7 @@ module.exports = function(routes, options) {
   options = options || {};
 
   function updateBundle() {
-    bundlePromise = aggregate(bundle.bundle({debug: options.debug}))
+    bundlePromise = bundle.toPromise({debug: options.debug})
   }
 
   function getBundle() {
