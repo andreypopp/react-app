@@ -8,12 +8,12 @@
 
 var path = require('path'),
     express = require('express'),
-    browserify = require('browserify'),
-    watchify = require('watchify'),
     defer = require('kew').defer,
     callsite = require('callsite'),
-    Router = require('./router'),
     XMLHttpRequest = require('xhr2');
+    aggregate = require('stream-aggregate-promise'),
+    Bundler = require('./bundler'),
+    Router = require('./router');
 
 function _genServerRenderingCode(module, props) {
   return [
@@ -127,7 +127,7 @@ function sendPage(routes, getBundle) {
           _genClientRoutingCode(match.handler, rendered.props, routes) +
           '<script async onload="__bootstrap();" src="/__script__"></script>')
         return res.send(rendered);
-      }).fail(next);
+      }).fail(next)
   };
 }
 
@@ -164,22 +164,13 @@ function sendScript(getBundle) {
 module.exports = function(routes, options) {
   var root = path.dirname(callsite()[1].getFileName()),
       app = express(),
-      bundle = browserify(),
+      bundle = new Bundler(),
       bundlePromise = null;
 
   options = options || {};
 
-  function computeBundle() {
-    var promise = defer();
-    bundle.bundle({debug: options.debug}, function(err, result) {
-      if (err) throw err;
-      promise.resolve(result);
-    });
-    return promise;
-  }
-
   function updateBundle() {
-    bundlePromise = computeBundle();
+    bundlePromise = aggregate(bundle.bundle({debug: options.debug}))
   }
 
   function getBundle() {
@@ -194,8 +185,8 @@ module.exports = function(routes, options) {
 
   bundle
     .transform('reactify')
-    .require('react-tools/build/modules/React')
-    .require(path.join(__dirname, './bootstrap'),
+    .require('react-tools/build/modules/React', {expose: true})
+    .require(path.join(__dirname, './bootstrap.js'),
       {expose: 'react-app/bootstrap'});
 
   for (var k in routes) {
@@ -208,9 +199,9 @@ module.exports = function(routes, options) {
     bundle = options.configureBundle(bundle);
   }
 
-  if (options.debug) {
-    watchify(bundle).on('update', updateBundle);
-  }
+//if (options.debug) {
+//  watchify(bundle).on('update', updateBundle);
+//}
 
   updateBundle();
 
