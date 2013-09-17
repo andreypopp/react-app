@@ -13,7 +13,7 @@ var path = require('path'),
     defer = require('kew').defer,
     callsite = require('callsite'),
     Router = require('./router'),
-    XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+    XMLHttpRequest = require('xhr2');
 
 function _genServerRenderingCode(module, props) {
   return [
@@ -74,10 +74,12 @@ function renderComponent(bundle, module, props) {
   contextify(context);
   context.run(bundle);
   context.run(_genServerRenderingCode(module, props));
-  promise.fin(function() {
-    context.dispose();
+  return promise.then(function(result) {
+    // if we dispose context on the current tick we will crash cause Node didn't
+    // free some I/O handles yet
+    process.nextTick(function() { context.dispose(); });
+    return result;
   });
-  return promise;
 }
 
 /**

@@ -11,7 +11,7 @@
     "url": "https://github.com/andreypopp/react-app.git"
   },
   "dependencies": {
-    "xmlhttprequest": "*",
+    "xhr2": "*",
     "express": "3.x.x",
     "browserify": "2.x.x",
     "url-pattern": "~0.2.1",
