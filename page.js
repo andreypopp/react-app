@@ -72,8 +72,10 @@ module.exports = React.createClass({
         params: match.params
       };
       if (typeof match.handler.getData === 'function') {
-        return match.handler.getData(props).then(function(component) {
-          component.render().getInitialState().contents;
+        return match.handler.getData(props).then(function(data) {
+          for (var k in data) props[k] = data[k];
+          var component = match.handler.Component(props);
+          return component.render().getInitialState().contents;
         });
       } else {
         return match.handler(props).render().getInitialState().contents;

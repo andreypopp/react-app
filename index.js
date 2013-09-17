@@ -20,29 +20,35 @@ function _genServerRenderingCode(module, props) {
     "var React = require('react-tools/build/modules/React');",
     "var Component = require(" + JSON.stringify(module) + ");",
     "var props = " + JSON.stringify(props) + ";",
-    "var render = function(component) {",
-    "  React.renderComponentToString(component, __done);",
+    "var render = function(data) {",
+    "  if (data) {",
+    "    for (var k in data) props[k] = data[k];",
+    "  }",
+    "  Component = Component.Component || Component;",
+    "  React.renderComponentToString(Component(props), function(markup) {",
+    "    __done({markup: markup, props: props});",
+    "  });",
     "};",
     "if (typeof Component.getData === 'function') {",
     "  Component.getData(props).then(render).fail(__error).end();",
     "} else {",
-    "  render(Component(props));",
+    "  render();",
     "}",
   ].join('\n');
 }
 
-function _genClientRoutingCode(handler, request, routes) {
+function _genClientRoutingCode(handler, props, routes) {
   return [
     "<script>",
       "var __bootstrap = function() {",
         "var handler = require(" + JSON.stringify(handler) + ");",
-        "var request = " + JSON.stringify(request) + ";",
+        "var props = " + JSON.stringify(props) + ";",
         "var routes = " + JSON.stringify(routes) + ";",
         "var bootstrap = require('react-app/bootstrap');",
         "for (var key in routes) {",
         "  routes[key] = require(routes[key]);",
         "}",
-        "bootstrap(handler, request, routes);",
+        "bootstrap(handler, props, routes);",
       "};",
     "</script>"
   ].join('\n');
@@ -105,7 +111,7 @@ function sendPage(routes, getBundle) {
       return next();
     }
 
-    var request = {
+    var props = {
       path: req.path,
       query: req.query,
       params: match.params
@@ -113,10 +119,10 @@ function sendPage(routes, getBundle) {
 
     getBundle()
       .then(function(result) {
-        return renderComponent(result, match.handler, request);
+        return renderComponent(result, match.handler, props);
       }).then(function(rendered) {
-        rendered = _insertScriptTag(rendered,
-          _genClientRoutingCode(match.handler, request, routes) +
+        rendered = _insertScriptTag(rendered.markup,
+          _genClientRoutingCode(match.handler, rendered.props, routes) +
           '<script async onload="__bootstrap();" src="/__script__"></script>')
         return res.send(rendered);
       }).fail(next);
