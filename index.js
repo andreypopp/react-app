@@ -50,7 +50,7 @@ function _genClientRoutingCode(handler, request, routes) {
  * @returns {String} Rendered React component
  */
 function renderComponent(bundle, module, props) {
-  var context = {result: null};
+  var context = {result: null, self: {}};
   var contextify = require('contextify');
   contextify(context);
   context.run(bundle);
