@@ -9,15 +9,16 @@ var ReactMount = require('react-tools/build/modules/ReactMount'),
     React = require('react-tools/build/modules/React'),
     Router = require('./router');
 
-module.exports = function(component, props, routes) {
-  props.router = new Router(routes)
+module.exports = function(Component, props, routes) {
+  Component = Component.Component || Component;
+  props.router = new Router(routes);
   ReactMount.allowFullPageRender = true;
 
   if (document.readyState == 'interactive') {
-    React.renderComponent(component(props), document);
+    React.renderComponent(Component(props), document);
   } else {
     window.addEventListener('DOMContentLoaded', function() {
-      React.renderComponent(component(props), document);
+      React.renderComponent(Component(props), document);
     });
   }
 }

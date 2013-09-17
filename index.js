@@ -12,15 +12,22 @@ var path = require('path'),
     watchify = require('watchify'),
     defer = require('kew').defer,
     callsite = require('callsite'),
-    Router = require('./router');
+    Router = require('./router'),
+    XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
 function _genServerRenderingCode(module, props) {
   return [
     "var React = require('react-tools/build/modules/React');",
     "var Component = require(" + JSON.stringify(module) + ");",
-    "React.renderComponentToString(",
-    "Component(" + (JSON.stringify(props)) + "),",
-    "function(str) { result = str; });"
+    "var props = " + JSON.stringify(props) + ";",
+    "var render = function(component) {",
+    "  React.renderComponentToString(component, __done);",
+    "};",
+    "if (typeof Component.getData === 'function') {",
+    "  Component.getData(props).then(render).fail(__error).end();",
+    "} else {",
+    "  render(Component(props));",
+    "}",
   ].join('\n');
 }
 
@@ -50,13 +57,21 @@ function _genClientRoutingCode(handler, request, routes) {
  * @returns {String} Rendered React component
  */
 function renderComponent(bundle, module, props) {
-  var context = {result: null, self: {}};
-  var contextify = require('contextify');
+  var promise = defer(),
+      context = {
+        __done: promise.resolve.bind(promise),
+        __error: promise.reject.bind(promise),
+        console: console,
+        self: {XMLHttpRequest: XMLHttpRequest}
+      },
+      contextify = require('contextify');
   contextify(context);
   context.run(bundle);
   context.run(_genServerRenderingCode(module, props));
-  context.dispose();
-  return context.result;
+  promise.fin(function() {
+    context.dispose();
+  });
+  return promise;
 }
 
 /**
@@ -86,7 +101,7 @@ function sendPage(routes, getBundle) {
     var router = new Router(routes),
         match = router.match(req.path);
 
-    if (match === null) {
+    if (!match) {
       return next();
     }
 
@@ -98,7 +113,8 @@ function sendPage(routes, getBundle) {
 
     getBundle()
       .then(function(result) {
-        var rendered = renderComponent(result, match.handler, request);
+        return renderComponent(result, match.handler, request);
+      }).then(function(rendered) {
         rendered = _insertScriptTag(rendered,
           _genClientRoutingCode(match.handler, request, routes) +
           '<script async onload="__bootstrap();" src="/__script__"></script>')

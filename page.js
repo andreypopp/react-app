@@ -9,6 +9,22 @@
 var qs = require('querystring'),
     React = require('react-tools/build/modules/React');
 
+function resolve(value) {
+  return {
+    then: function(func) {
+      try {
+        var v = func(value);
+        return (typeof v.then === 'function') ? v : resolve(v);
+      } catch (e) {
+        this._error = e
+      }
+    },
+    end: function() {
+      if (this._error) throw this._error;
+    },
+  }
+}
+
 /**
  * Shallow equality test
  *
@@ -50,22 +66,39 @@ module.exports = React.createClass({
   activeContents: function(path, query) {
     var match = this.props.router.match(path);
     if (match) {
-      var request = {
+      var props = {
         path: path,
         query: query,
         params: match.params
+      };
+      if (typeof match.handler.getData === 'function') {
+        return match.handler.getData(props).then(function(component) {
+          component.render().getInitialState().contents;
+        });
+      } else {
+        return match.handler(props).render().getInitialState().contents;
       }
-      return match.handler(request).render().getInitialState().contents;
     }
   },
 
   loadURL: function(path, query) {
     if (path !== this.state.path || !shallowEqual(query, this.state.query)) {
-      this.setState({
-        path: path,
-        query: query,
-        contents: this.activeContents(path, query),
-      });
+      var contents = this.activeContents(path, query);
+      if (contents && typeof contents.then === 'function') {
+        contents.then(function(contents) {
+          this.setState({
+            path: path,
+            query: query,
+            contents: contents
+          });
+        }.bind(this)).end()
+      } else if (contents) {
+        this.setState({
+          path: path,
+          query: query,
+          contents: contents
+        });
+      }
     }
   },
 
