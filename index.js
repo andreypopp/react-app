@@ -10,7 +10,7 @@ var path = require('path'),
     express = require('express'),
     defer = require('kew').defer,
     callsite = require('callsite'),
-    XMLHttpRequest = require('xhr2');
+    XMLHttpRequest = require('xhr2'),
     Bundler = require('./bundler'),
     Router = require('./router');
 
