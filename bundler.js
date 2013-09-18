@@ -6,6 +6,7 @@ var DGraph        = require('dgraph').Graph,
     through       = require('through'),
     asStream      = require('as-stream'),
     combine       = require('stream-combiner'),
+    cssImportTr   = require('dgraph-css-import'),
     cssPack       = require('css-pack'),
     utils         = require('lodash');
 
@@ -37,7 +38,7 @@ Bundler.prototype = {
         css = through(),
         graph = new DGraph([], {
           modules: builtins,
-          transform: this._transform
+          transform: this._transform.concat(cssImportTr)
         });
 
     graph.resolveMany(this._entries, {id: __filename})
