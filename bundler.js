@@ -1,12 +1,13 @@
-var path          = require('path'),
-    DGraph        = require('dgraph').Graph,
+var DGraph        = require('dgraph').Graph,
     DGraphBundler = require('dgraph-bundler').Bundler,
-    reactify      = require('reactify'),
     aggregate     = require('stream-aggregate-promise'),
     builtins      = require('browser-builtins'),
     insertGlobals = require('insert-module-globals'),
     through       = require('through'),
-    combine       = require('stream-combiner')
+    asStream      = require('as-stream'),
+    combine       = require('stream-combiner'),
+    cssPack       = require('css-pack'),
+    utils         = require('lodash');
 
 function Bundler(opts) {
   this.opts = opts;
@@ -28,14 +29,12 @@ Bundler.prototype = {
     return this
   },
 
-  toPromise: function(opts) {
-    return aggregate(this.toStream(opts));
-  },
-
-  toStream: function(opts) {
+  bundle: function(opts) {
     opts = opts || {};
     var self = this,
-        output = through(),
+        expose = {},
+        js = through(),
+        css = through(),
         graph = new DGraph([], {
           modules: builtins,
           transform: this._transform
@@ -43,29 +42,68 @@ Bundler.prototype = {
 
     graph.resolveMany(this._entries, {id: __filename})
       .then(function(resolved) {
-        var expose = {};
-
         for (var id in resolved) {
           expose[resolved[id]] = self._expose[id];
           graph.addEntry(resolved[id]);
         }
-
-        var modules = combine(graph.toStream(), insertGlobals()),
+        return graph.toPromise();
+      })
+      .then(function(graph) {
+        var cssGraph = filter(graph, function(mod) {
+              return mod.id.match(/\.css$/);
+            }),
+            jsGraph = except(graph, cssGraph),
+            modules = combine(indexToStream(jsGraph), insertGlobals()),
             bundler = new DGraphBundler(modules, {
               debug: opts.debug,
               expose: expose
             });
 
+        if (!utils.isEmpty(cssGraph)) {
+          combine(indexToStream(cssGraph), cssPack())
+            .on('error', function(x) { css.emit('error', x); })
+            .pipe(css);
+        } else {
+          css.end();
+        }
+
         bundler.toStream()
-          .on('error', function(x) { output.emit('error', x); })
-          .pipe(output);
+          .on('error', function(x) { js.emit('error', x); })
+          .pipe(js);
       })
-      .fail(output.emit.bind(output, 'error'))
+      .fail(js.emit.bind(js, 'error'))
       .end();
 
-    return output;
+    return {js: aggregate(js), css: aggregate(css)};
   }
 
+}
+
+function indexToStream(index) {
+  var values = [];
+  for (var k in index)
+    values.push(index[k]);
+  return asStream.apply(null, values);
+}
+
+function filter(graph, predicate) {
+  var result = {};
+  for (var id in graph)
+    if (predicate(graph[id]))
+      result[id] = graph[id];
+  return result;
+}
+
+function except(a, b) {
+  var result = {'react-app/dummy': {id: 'react-app/dummy', source: ''}};
+  for (var id in a)
+    if (!b[id]) {
+      var mod = result[id] = utils.cloneDeep(a[id]);
+      for (var depId in mod.deps)
+        if (b[mod.deps[depId]])
+          mod.deps[depId] = 'react-app/dummy';
+    }
+  return result;
 }
 
 module.exports = Bundler;

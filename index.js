@@ -89,8 +89,8 @@ function renderComponent(bundle, module, props) {
  * @param {String} tag Script tag to insert
  * @returns {String} Markup with inserted script tags
  */
-function _insertScriptTag(markup, tag) {
-  var index = markup.indexOf('</html>');
+function _insertIntoHead(markup, tag) {
+  var index = markup.indexOf('</head>');
   if (index > -1) {
     return markup.slice(0, index) + tag + markup.slice(index);
   } else {
@@ -120,11 +120,12 @@ function sendPage(routes, getBundle) {
     };
 
     getBundle()
-      .then(function(result) {
+      .js.then(function(result) {
         return renderComponent(result, match.handler, props);
       }).then(function(rendered) {
-        rendered = _insertScriptTag(rendered.markup,
+        rendered = _insertIntoHead(rendered.markup,
           _genClientRoutingCode(match.handler, rendered.props, routes) +
+          '<link rel="stylesheet" href="/__styles__">' +
           '<script async onload="__bootstrap();" src="/__script__"></script>')
         return res.send(rendered);
       }).fail(next)
@@ -140,7 +141,16 @@ function sendScript(getBundle) {
   return function(req, res, next) {
     res.setHeader('Content-Type', 'application/json');
     getBundle()
-      .then(function(result) { res.send(result) })
+      .js.then(function(result) { res.send(result) })
+      .fail(next);
+  };
+}
+
+function sendStyles(getBundle) {
+  return function(req, res, next) {
+    res.setHeader('Content-Type', 'text/css');
+    getBundle()
+      .css.then(function(result) { res.send(result) })
       .fail(next);
   };
 }
@@ -170,7 +180,7 @@ module.exports = function(routes, options) {
   options = options || {};
 
   function updateBundle() {
-    bundlePromise = bundle.toPromise({debug: options.debug})
+    bundlePromise = bundle.bundle({debug: options.debug})
   }
 
   function getBundle() {
@@ -206,6 +216,7 @@ module.exports = function(routes, options) {
   updateBundle();
 
   app.get('/__script__', sendScript(getBundle));
+  app.get('/__styles__', sendStyles(getBundle));
   app.use(sendPage(routes, getBundle));
 
   return app;
