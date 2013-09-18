@@ -60,16 +60,12 @@ Bundler.prototype = {
             });
 
         if (!utils.isEmpty(cssGraph)) {
-          combine(indexToStream(cssGraph), cssPack())
-            .on('error', function(x) { css.emit('error', x); })
-            .pipe(css);
+          pipe(combine(indexToStream(cssGraph), cssPack()), css);
         } else {
           css.end();
         }
 
-        bundler.toStream()
-          .on('error', function(x) { js.emit('error', x); })
-          .pipe(js);
+        pipe(bundler.toStream(), js);
       })
       .fail(js.emit.bind(js, 'error'))
       .end();
@@ -77,6 +73,12 @@ Bundler.prototype = {
     return {js: aggregate(js), css: aggregate(css)};
   }
 
+}
+
+function pipe(a, b) {
+  return a
+    .on('error', function(err) { b.emit('error', err); })
+    .pipe(b);
 }
 
 function indexToStream(index) {
