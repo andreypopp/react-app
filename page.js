@@ -9,22 +9,6 @@
 var qs = require('querystring'),
     React = require('react-tools/build/modules/React');
 
-function resolve(value) {
-  return {
-    then: function(func) {
-      try {
-        var v = func(value);
-        return (typeof v.then === 'function') ? v : resolve(v);
-      } catch (e) {
-        this._error = e
-      }
-    },
-    end: function() {
-      if (this._error) throw this._error;
-    },
-  }
-}
-
 /**
  * Shallow equality test
  *
@@ -122,7 +106,7 @@ module.exports = React.createClass({
 
   onNavigate: function(e) {
     var href = e.target.attributes.href && e.target.attributes.href.value;
-    if (href) {
+    if (href && !href.match(/^https?:/)) {
       e.preventDefault();
       this.navigate(href);
     }
