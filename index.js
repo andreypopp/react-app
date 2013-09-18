@@ -11,6 +11,7 @@ var path = require('path'),
     defer = require('kew').defer,
     callsite = require('callsite'),
     XMLHttpRequest = require('xhr2'),
+    reactify = require('reactify'),
     Bundler = require('./bundler'),
     Router = require('./router');
 
@@ -183,7 +184,7 @@ module.exports = function(routes, options) {
   }
 
   bundle
-    .transform('reactify')
+    .transform(reactify)
     .require('react-tools/build/modules/React', {expose: true})
     .require(path.join(__dirname, './bootstrap.js'),
       {expose: 'react-app/bootstrap'});
