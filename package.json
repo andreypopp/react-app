@@ -28,7 +28,7 @@
     "as-stream": "~0.1.0",
     "lodash": "~2.0.0",
     "css-pack": "~0.1.4",
-    "dgraph-css-import": "~0.1.0"
+    "dgraph-css-import": "~0.1.1"
   },
   "devDependencies": {
     "react-tools": "http://data.andreypopp.com/react-tools-0.5.0-alpha.tgz",
