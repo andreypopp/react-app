@@ -125,8 +125,8 @@ function sendPage(routes, getBundle) {
       }).then(function(rendered) {
         rendered = _insertIntoHead(rendered.markup,
           _genClientRoutingCode(match.handler, rendered.props, routes) +
-          '<link rel="stylesheet" href="/__styles__">' +
-          '<script async onload="__bootstrap();" src="/__script__"></script>')
+          '<link rel="stylesheet" href="/assets/app.css">' +
+          '<script async onload="__bootstrap();" src="/assets/app.js"></script>')
         return res.send(rendered);
       }).fail(next)
   };
@@ -209,14 +209,10 @@ module.exports = function(routes, options) {
     bundle = options.configureBundle(bundle);
   }
 
-//if (options.debug) {
-//  watchify(bundle).on('update', updateBundle);
-//}
-
   updateBundle();
 
-  app.get('/__script__', sendScript(getBundle));
-  app.get('/__styles__', sendStyles(getBundle));
+  app.get('/assets/app.js', sendScript(getBundle));
+  app.get('/assets/app.css', sendStyles(getBundle));
   app.use(sendPage(routes, getBundle));
 
   return app;
