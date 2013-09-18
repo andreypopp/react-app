@@ -1,6 +1,6 @@
 var path          = require('path'),
     DGraph        = require('dgraph').Graph,
-    bundler       = require('dgraph-bundler'),
+    DGraphBundler = require('dgraph-bundler').Bundler,
     reactify      = require('reactify'),
     aggregate     = require('stream-aggregate-promise'),
     builtins      = require('browser-builtins'),
@@ -50,13 +50,18 @@ Bundler.prototype = {
           graph.addEntry(resolved[id]);
         }
 
-        return combine(
-          bundler(graph.toStream(), {debug: opts.debug, expose: expose}),
-          insertGlobals(),
-          output
-        );
+        var modules = combine(graph.toStream(), insertGlobals()),
+            bundler = new DGraphBundler(modules, {
+              debug: opts.debug,
+              expose: expose
+            });
+
+        bundler.toStream()
+          .on('error', function(x) { output.emit('error', x); })
+          .pipe(output);
       })
-      .fail(output.emit.bind(output, 'error'));
+      .fail(output.emit.bind(output, 'error'))
+      .end();
 
     return output;
   }
