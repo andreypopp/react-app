@@ -4,6 +4,8 @@
  *
  */
 
+require('./styles.css');
+
 var React = require('react-tools/build/modules/React'),
     Page = require('../../page.js'),
     DebugInfo = require('./debug_info.jsx');
@@ -18,7 +20,7 @@ module.exports = React.createClass({
         </head>
         <body>
           <h1>Hello, index!</h1>
-          <a href="/pages/about">About page</a>
+          <a href="/pages/about"><i class="icon icon-pencil"></i> About page</a>
           {debugInfo}
         </body>
       </Page>

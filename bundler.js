@@ -7,7 +7,9 @@ var DGraph        = require('dgraph').Graph,
     asStream      = require('as-stream'),
     combine       = require('stream-combiner'),
     cssImportTr   = require('dgraph-css-import'),
+    cssInlineWoff = require('dgraph-css-inline-woff'),
     cssPack       = require('css-pack'),
+    depsSort      = require('deps-sort'),
     utils         = require('lodash');
 
 function Bundler(opts) {
@@ -37,8 +39,11 @@ Bundler.prototype = {
         js = through(),
         css = through(),
         graph = new DGraph([], {
+          noParse: function(id) {
+            return id.match(/\.css$/);
+          },
           modules: builtins,
-          transform: this._transform.concat(cssImportTr)
+          transform: this._transform.concat(cssImportTr, cssInlineWoff)
         });
 
     graph.resolveMany(this._entries, {id: __filename})
@@ -61,12 +66,12 @@ Bundler.prototype = {
             });
 
         if (!utils.isEmpty(cssGraph)) {
-          pipe(combine(indexToStream(cssGraph), cssPack()), css);
+          combine(indexToStream(cssGraph), depsSort(), cssPack(), css);
         } else {
           css.end();
         }
 
-        pipe(bundler.toStream(), js);
+        combine(bundler.toStream(), js);
       })
       .fail(js.emit.bind(js, 'error'))
       .end();
@@ -74,12 +79,6 @@ Bundler.prototype = {
     return {js: aggregate(js), css: aggregate(css)};
   }
 
-}
-
-function pipe(a, b) {
-  return a
-    .on('error', function(err) { b.emit('error', err); })
-    .pipe(b);
 }
 
 function indexToStream(index) {
