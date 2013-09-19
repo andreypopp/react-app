@@ -172,15 +172,23 @@ function sendStyles(getBundle) {
  * @retuens {Object} Configured express application
  */
 module.exports = function(routes, options) {
-  var root = path.dirname(callsite()[1].getFileName()),
-      app = express(),
-      bundle = new Bundler(),
-      bundlePromise = null;
-
   options = options || {};
 
+  var root = path.dirname(callsite()[1].getFileName()),
+      app = express(),
+      bundle = new Bundler({watch: options.debug}),
+      bundlePromise = null;
+
+  function log() {
+    if (options.debug) console.log.apply(console, arguments)
+  }
+
   function updateBundle() {
+    var start = Date.now();
     bundlePromise = bundle.bundle({debug: options.debug})
+    bundlePromise.js.then(function(js) {
+      log('bundle built in', Date.now() - start, 'ms')
+    })
   }
 
   function getBundle() {
@@ -208,6 +216,8 @@ module.exports = function(routes, options) {
   if (options.configureBundle) {
     bundle = options.configureBundle(bundle);
   }
+
+  bundle.on('update', updateBundle);
 
   updateBundle();
 
