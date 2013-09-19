@@ -1,11 +1,11 @@
 var q             = require('kew'),
     EventEmitter  = require('events').EventEmitter,
 
-    DGraph        = require('dgraph').Graph,
+    DGraphLive    = require('./dgraph-live'),
+    DGraph        = require('dgraph').Graph;
     DGraphBundler = require('dgraph-bundler').Bundler,
     cssImportTr   = require('dgraph-css-import'),
     cssInlineWoff = require('dgraph-css-inline-woff'),
-    watcher       = require('dgraph-watcher'),
 
     utils         = require('lodash'),
     through       = require('through'),
@@ -31,15 +31,12 @@ function Bundler(opts) {
   this._expose = {};
   this._transform = [];
 
-  this._resolvedEntries = undefined;
   this._resolvedExpose = {};
-  this._graph = undefined;
 }
 
 
 Bundler.prototype = {
   require: function(id, opts) {
-    this._resolvedEntries = undefined;
     this._entries.push(id);
     if (opts.expose)
       this._expose[id] = (typeof opts.expose === 'string') ?  opts.expose : id
@@ -47,53 +44,49 @@ Bundler.prototype = {
   },
 
   transform: function(tr) {
-    this._graph = undefined;
     this._transform.push(tr);
     return this
   },
 
-  resolveEntries: function(entries) {
-    if (this._resolvedEntries)
-      return this._resolvedEntries;
-
+  resolveEntries: utils.memoize(function() {
     var resolutions = this._entries
       .map(function(id) { return resolvePromise(id, {filename: __filename}) });
 
-    return this._resolvedEntries = q.all(resolutions).then(function(entries) {
+    return q.all(resolutions).then(function(entries) {
       var resolved = utils.zipObject(this._entries, entries);
       for (var id in resolved)
         this._resolvedExpose[resolved[id]] = this._expose[id];
       return entries;
     }.bind(this));
-  },
+  }),
 
-  createGraph: function() {
-    if (this._graph)
-      return this._graph;
-
-    var entries = this.resolveEntries();
-    return this._graph = entries.then(function(entries) {
-      var graph = new DGraph(entries, {
-            noParse: RegExp.prototype.exec.bind(/\.css$/),
-            transform: this._transform.concat(cssImportTr, cssInlineWoff),
-            modules: builtins
-          });
-      if (this.opts.watch) {
-        graph = watcher(graph);
-        graph.on('update', this.emit.bind(this, 'update'));
-      }
+  createGraph: utils.memoize(function() {
+    return this.resolveEntries().then(function(entries) {
+      var graph = new DGraphLive(entries, {
+        noParse: RegExp.prototype.exec.bind(/\.css$/),
+        transform: this._transform.concat(cssImportTr, cssInlineWoff),
+        modules: builtins
+      });
+      if (this.opts.watch)
+        graph.on('update', this.emit.bind(this, 'update'))
       return graph;
     }.bind(this));
-  },
+  }),
 
   bundle: function(opts) {
     opts = opts || {};
 
-    var js = through(),
-        css = through();
+    var js = through(), css = through();
 
     this.createGraph()
-      .then(function(graph) { return graph.toPromise(); })
+      .then(function(graph) {
+        return aggregate(graph.toStream());
+      })
+      .then(function(modules) {
+        var graph = {};
+        modules.forEach(function(mod) { graph[mod.id] = mod; });
+        return graph;
+      })
       .then(function(graph) {
         var cssGraph = filter(graph, function(mod) {
               return mod.id.match(/\.css$/);
@@ -107,7 +100,7 @@ Bundler.prototype = {
               expose: this._resolvedExpose
             }).toStream(),
           js);
-        
+
         if (!utils.isEmpty(cssGraph)) {
           combine(
             indexToStream(cssGraph), depsSort(), cssPack(),

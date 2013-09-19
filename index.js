@@ -183,11 +183,11 @@ module.exports = function(routes, options) {
     if (options.debug) console.log.apply(console, arguments)
   }
 
-  function updateBundle() {
+  function updateBundle(detected) {
     var start = Date.now();
     bundlePromise = bundle.bundle({debug: options.debug})
-    bundlePromise.js.then(function(js) {
-      log('bundle built in', Date.now() - start, 'ms')
+    bundlePromise.js.then(function() {
+      log('bundle built:', Date.now() - start, 'ms');
     })
   }
 
