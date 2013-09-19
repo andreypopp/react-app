@@ -28,7 +28,7 @@ GraphLive.prototype = {
     this.cache[mod.id] = mod;
     this.watching[mod.id] = fs.watch(mod.id, function() {
       this.watching[mod.id].close();
-      this.cache[mod.id] = undefined;
+      this.cache[mod.id].source = undefined;
       this.watching[mod.id] = undefined;
       this.update(Date.now());
     }.bind(this));
