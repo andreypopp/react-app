@@ -7,7 +7,8 @@
 "use strict";
 
 var qs = require('querystring'),
-    React = require('react-tools/build/modules/React');
+    React = require('react-tools/build/modules/React'),
+    bootstrapComponent = require('./bootstrap').bootstrapComponent;
 
 /**
  * Shallow equality test
@@ -47,7 +48,7 @@ module.exports = React.createClass({
     window.removeEventListener('popstate', this.onPopState);
   },
 
-  activeContents: function(path, query) {
+  activeContents: function(path, query, callback) {
     var match = this.props.router.match(path);
     if (match) {
       var props = {
@@ -55,36 +56,26 @@ module.exports = React.createClass({
         query: query,
         params: match.params
       };
-      if (typeof match.handler.getData === 'function') {
-        return match.handler.getData(props).then(function(data) {
-          for (var k in data) props[k] = data[k];
-          var component = match.handler.Component(props);
-          return component.render().getInitialState().contents;
-        });
-      } else {
-        return match.handler(props).render().getInitialState().contents;
-      }
+      bootstrapComponent(match.handler, props, function(err, spec) {
+        if (err) return callback(err);
+        var result = spec.Component(spec.props)
+          .render()
+          .getInitialState()
+          .contents;
+        callback(null, result);
+      });
     }
   },
 
   loadURL: function(path, query) {
     if (path !== this.state.path || !shallowEqual(query, this.state.query)) {
-      var contents = this.activeContents(path, query);
-      if (contents && typeof contents.then === 'function') {
-        contents.then(function(contents) {
-          this.setState({
-            path: path,
-            query: query,
-            contents: contents
-          });
-        }.bind(this)).end()
-      } else if (contents) {
+      this.activeContents(path, query, function(err, contents) {
         this.setState({
           path: path,
           query: query,
           contents: contents
         });
-      }
+      }.bind(this));
     }
   },
 

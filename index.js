@@ -18,22 +18,15 @@ var path = require('path'),
 function _genServerRenderingCode(module, props) {
   return [
     "var React = require('react-tools/build/modules/React');",
+    "var bootstrapComponent = require('react-app/bootstrap').bootstrapComponent;",
     "var Component = require(" + JSON.stringify(module) + ");",
     "var props = " + JSON.stringify(props) + ";",
-    "var render = function(data) {",
-    "  if (data) {",
-    "    for (var k in data) props[k] = data[k];",
-    "  }",
-    "  Component = Component.Component || Component;",
-    "  React.renderComponentToString(Component(props), function(markup) {",
-    "    __done({markup: markup, props: props});",
+    "bootstrapComponent(Component, props, function(err, spec) {",
+    "  if (err) return __react_app_callback(err);",
+    "  React.renderComponentToString(spec.Component(spec.props), function(markup) {",
+    "    __react_app_callback(null, {markup: markup, props: spec.props});",
     "  });",
-    "};",
-    "if (typeof Component.getData === 'function') {",
-    "  Component.getData(props).then(render).fail(__error).end();",
-    "} else {",
-    "  render();",
-    "}",
+    "});",
   ].join('\n');
 }
 
@@ -65,8 +58,7 @@ function _genClientRoutingCode(handler, props, routes) {
 function renderComponent(bundle, module, props) {
   var promise = defer(),
       context = {
-        __done: promise.resolve.bind(promise),
-        __error: promise.reject.bind(promise),
+        __react_app_callback: promise.makeNodeResolver(),
         console: console,
         self: {XMLHttpRequest: XMLHttpRequest}
       },
