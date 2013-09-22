@@ -50,7 +50,7 @@ module.exports.bootstrapComponent = function(Component, props, callback) {
       callback(err);
     }
 
-    if (typeof getData.length === 1) {
+    if (getData.length === 1) {
       getData(props).then(onSuccess, onError).end();
     } else {
       getData(props, function(err, data) {
