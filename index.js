@@ -40,16 +40,16 @@ function _genServerRenderingCode(module, props) {
 function _genClientRoutingCode(handler, props, routes) {
   return [
     "<script>",
-      "var __bootstrap = function() {",
-        "var handler = require(" + JSON.stringify(handler) + ");",
-        "var props = " + JSON.stringify(props) + ";",
-        "var routes = " + JSON.stringify(routes) + ";",
-        "var bootstrap = require('react-app/bootstrap');",
-        "for (var key in routes) {",
-        "  routes[key] = require(routes[key]);",
-        "}",
-        "bootstrap(handler, props, routes);",
-      "};",
+    "  var __bootstrap = function() {",
+    "    var handler = require(" + JSON.stringify(handler) + ");",
+    "    var props = " + JSON.stringify(props) + ";",
+    "    var routes = " + JSON.stringify(routes) + ";",
+    "    var bootstrap = require('react-app/bootstrap');",
+    "    for (var key in routes) {",
+    "      routes[key] = require(routes[key]);",
+    "    }",
+    "    bootstrap(handler, props, routes);",
+    "  };",
     "</script>"
   ].join('\n');
 }
