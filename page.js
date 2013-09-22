@@ -96,10 +96,17 @@ module.exports = React.createClass({
   },
 
   onNavigate: function(e) {
-    var href = e.target.attributes.href && e.target.attributes.href.value;
-    if (href && !href.match(/^https?:/)) {
-      e.preventDefault();
-      this.navigate(href);
+    var current = e.target;
+    while (current) {
+      if (current.tagName === 'A') {
+        var href = current.attributes.href && current.attributes.href.value;
+        if (href && !href.match(/^https?:/)) {
+          e.preventDefault();
+          this.navigate(href);
+        }
+        break;
+      }
+      current = current.parentNode;
     }
   },
 
