@@ -12,25 +12,30 @@ function GraphLive(mains, opts) {
   this.cache = opts.cache = {};
   this.update = utils.debounce(
     this.update,
-    this.opts.delay || 100,
+    this.opts.delay || 200,
     {maxWait: 1000});
 }
 
 GraphLive.prototype = {
 
-  update: function(detected) {
-    this.emit('update', detected);
+  update: function(detected, id) {
+    this.emit('update', detected, id);
+    this.watchModule(id);
   },
 
   onModule: function(mod) {
     if (this.watching[mod.id]) return;
 
     this.cache[mod.id] = mod;
-    this.watching[mod.id] = fs.watch(mod.id, function() {
-      this.watching[mod.id].close();
-      this.cache[mod.id].source = undefined;
-      this.watching[mod.id] = undefined;
-      this.update(Date.now());
+    this.watchModule(mod.id);
+  },
+
+  watchModule: function(id) {
+    this.watching[id] = fs.watch(id, function() {
+      this.cache[id].source = undefined;
+      this.watching[id].close();
+      this.watching[id] = undefined;
+      this.update(Date.now(), id);
     }.bind(this));
   },
 
