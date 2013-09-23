@@ -1,8 +1,12 @@
+/**
+ * CommonJS bundler for JS and CSS.
+ */
+"use strict";
+
 var q             = require('kew'),
     EventEmitter  = require('events').EventEmitter,
 
-    DGraphLive    = require('./dgraph-live'),
-    DGraph        = require('dgraph').Graph;
+    DGraphLive    = require('dgraph-live'),
     DGraphBundler = require('dgraph-bundler').Bundler,
     cssImportTr   = require('dgraph-css-import'),
     cssInlineWoff = require('dgraph-css-inline-woff'),

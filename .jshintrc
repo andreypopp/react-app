@@ -12,6 +12,7 @@
     "exports": false,
     "window": false,
     "document": false,
+    "console": false,
     "__dirname": false,
     "__filename": false
   }
