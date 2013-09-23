@@ -180,7 +180,7 @@ module.exports = function(routes, options) {
     bundlePromise = bundle.bundle({debug: options.debug})
     bundlePromise.js.then(function() {
       log('bundle built:', Date.now() - start, 'ms');
-    })
+    }).end();
   }
 
   function getBundle() {
