@@ -50,7 +50,7 @@ GraphLive.prototype = {
         }.bind(this));
 
     return this.createGraph().toStream()
-      .on('error', interceptor.emit.bind(interceptor, 'error'))
+      .on('error', function(err) { interceptor.emit('error', err); })
       .pipe(interceptor);
   }
 };
