@@ -6,14 +6,16 @@
  */
 "use strict";
 
-var path = require('path'),
-    express = require('express'),
-    defer = require('kew').defer,
-    callsite = require('callsite'),
-    XMLHttpRequest = require('xhr2'),
-    reactify = require('reactify'),
-    Bundler = require('./bundler'),
-    Router = require('./router');
+var path            = require('path'),
+    express         = require('express'),
+    q               = require('kew'),
+    callsite        = require('callsite'),
+    XMLHttpRequest  = require('xhr2'),
+    DCompose        = require('dcompose'),
+    reactify        = require('reactify'),
+    aggregate       = require('stream-aggregate-promise'),
+    utils           = require('lodash'),
+    Router          = require('./router');
 
 function _genServerRenderingCode(module, props) {
   return [
@@ -56,7 +58,7 @@ function _genClientRoutingCode(handler, props, routes) {
  * @returns {String} Rendered React component
  */
 function renderComponent(bundle, module, props) {
-  var promise = defer(),
+  var promise = q.defer(),
       context = {
         __react_app_callback: promise.makeNodeResolver(),
         console: console,
@@ -96,7 +98,7 @@ function _insertIntoHead(markup, tag) {
  * @param {routes} routes Route table
  * @param {function} getBundle Returns a promise for a computed bundle
  */
-function sendPage(routes, getBundle) {
+function sendPage(routes, bundle) {
   return function(req, res, next) {
     var router = new Router(routes),
         match = router.match(req.path);
@@ -111,8 +113,8 @@ function sendPage(routes, getBundle) {
       params: match.params
     };
 
-    getBundle()
-      .js.then(function(result) {
+    bundle.js
+      .then(function(result) {
         return renderComponent(result, match.handler, props);
       }).then(function(rendered) {
         rendered = _insertIntoHead(rendered.markup,
@@ -120,30 +122,26 @@ function sendPage(routes, getBundle) {
           '<link rel="stylesheet" href="/assets/app.css">' +
           '<script async onload="__bootstrap();" src="/assets/app.js"></script>')
         return res.send(rendered);
-      }).fail(next)
+      }).fail(next);
   };
 }
 
 /**
  * Send computed script bundle.
  *
- * @param {function} getBundle returns a promise for a computed bundle
+ * @param {function} bundle returns a promise for a computed bundle
  */
-function sendScript(getBundle) {
+function sendScript(bundle) {
   return function(req, res, next) {
     res.setHeader('Content-Type', 'application/json');
-    getBundle()
-      .js.then(function(result) { res.send(result) })
-      .fail(next);
+    bundle.js.then(function(bundle) { res.send(bundle) }).fail(next);
   };
 }
 
-function sendStyles(getBundle) {
+function sendStyles(bundle) {
   return function(req, res, next) {
     res.setHeader('Content-Type', 'text/css');
-    getBundle()
-      .css.then(function(result) { res.send(result) })
-      .fail(next);
+    bundle.css.then(function(bundle) { res.send(bundle) }).fail(next);
   };
 }
 
@@ -168,54 +166,49 @@ module.exports = function(routes, options) {
 
   var root = path.dirname(callsite()[1].getFileName()),
       app = express(),
-      bundle = new Bundler({watch: options.debug}),
-      bundlePromise = null;
+      bundle = {};
 
   function log() {
     if (options.debug) console.log.apply(console, arguments)
   }
 
-  function updateBundle(detected) {
-    var start = Date.now();
-    bundlePromise = bundle.bundle({debug: options.debug})
-    bundlePromise.js.then(function() {
-      log('bundle built:', Date.now() - start, 'ms');
-    }).end();
+  function buildBundle(detected) {
+    var streams = composer.all({debug: options.debug});
+    for (var k in streams) 
+      bundle[k] = aggregate(streams[k]);
+    if (options.debug) {
+      var start = Date.now();
+      q.all(utils.values(bundle)).then(function() {
+        console.log('bundle built in', Date.now() - start, 'ms');
+      });
+    }
   }
 
-  function getBundle() {
-    return bundlePromise;
-  }
-
-  if (options.transforms) {
-    options.transforms.forEach(function(transform) {
-      bundle.transform(transform);
+  var pages = []
+  for (var k in routes) {
+    pages.push({
+      id: routes[k][0] === '.' ?  path.resolve(root, routes[k]) : routes[k],
+      expose: routes[k]
     });
   }
 
-  bundle
-    .transform(reactify)
-    .require('react-tools/build/modules/React', {expose: true})
-    .require(path.join(__dirname, './bootstrap.js'),
-      {expose: 'react-app/bootstrap'});
+  var composer = new DCompose({
+    entries: [
+      {id: 'react-tools/build/modules/React', expose: true},
+      {id: path.join(__dirname, './bootstrap'), expose: 'react-app/bootstrap'},
+    ].concat(pages),
+    transform: [].concat(options.transforms, reactify),
+    watch: options.debug
+  });
 
-  for (var k in routes) {
-    bundle.require(
-      (routes[k][0] === '.' ? path.resolve(root, routes[k]) : routes[k]),
-      {expose: routes[k]});
-  }
 
-  if (options.configureBundle) {
-    bundle = options.configureBundle(bundle);
-  }
+  composer.on('update', buildBundle);
 
-  bundle.on('update', updateBundle);
+  buildBundle();
 
-  updateBundle();
-
-  app.get('/assets/app.js', sendScript(getBundle));
-  app.get('/assets/app.css', sendStyles(getBundle));
-  app.use(sendPage(routes, getBundle));
+  app.get('/assets/app.js', sendScript(bundle));
+  app.get('/assets/app.css', sendStyles(bundle));
+  app.use(sendPage(routes, bundle));
 
   return app;
 
