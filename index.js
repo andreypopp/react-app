@@ -65,6 +65,7 @@ function renderComponent(bundle, module, props) {
       context = {
         __react_app_callback: promise.makeNodeResolver(),
         console: console,
+        XMLHttpRequest: XMLHttpRequest,
         self: {XMLHttpRequest: XMLHttpRequest}
       },
       contextify = require('contextify');
