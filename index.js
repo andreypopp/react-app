@@ -101,8 +101,9 @@ function _insertIntoHead(markup, tag) {
  *
  * @param {routes} routes Route table
  * @param {function} getBundle Returns a promise for a computed bundle
+ * @param {Object} pageOptions
  */
-function sendPage(routes, bundle) {
+function sendPage(routes, bundle, pageOptions) {
   return function(req, res, next) {
     var router = new Router(routes),
         match = router.match(req.path);
@@ -114,7 +115,8 @@ function sendPage(routes, bundle) {
     var props = {
       path: req.path,
       query: req.query,
-      params: match.params
+      params: match.params,
+      options: pageOptions
     };
 
     bundle.js
@@ -178,7 +180,7 @@ module.exports = function(routes, options) {
 
   function buildBundle(detected) {
     var streams = composer.all({debug: options.debug});
-    for (var k in streams) 
+    for (var k in streams)
       bundle[k] = aggregate(streams[k]);
     if (options.debug) {
       var start = Date.now();
@@ -213,7 +215,7 @@ module.exports = function(routes, options) {
 
   app.get('/assets/app.js', sendScript(bundle));
   app.get('/assets/app.css', sendStyles(bundle));
-  app.use(sendPage(routes, bundle));
+  app.use(sendPage(routes, bundle, options.pageOptions));
 
   return app;
 
