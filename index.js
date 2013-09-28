@@ -7,6 +7,7 @@
 "use strict";
 
 var path            = require('path'),
+    url             = require('url'),
     express         = require('express'),
     q               = require('kew'),
     callsite        = require('callsite'),
@@ -58,14 +59,16 @@ function _genClientRoutingCode(handler, props, routes) {
  * @param {String} bundle Computed browserify bundle which serves as environment
  * @param {String} module Module name which points to React component to render
  * @param {Object} props Component props to use
+ * @param {Object} location
  * @returns {String} Rendered React component
  */
-function renderComponent(bundle, module, props) {
+function renderComponent(bundle, module, props, location) {
   var promise = q.defer(),
       context = {
         __react_app_callback: promise.makeNodeResolver(),
         console: console,
         XMLHttpRequest: XMLHttpRequest,
+        location: location,
         self: {XMLHttpRequest: XMLHttpRequest}
       },
       contextify = require('contextify');
@@ -103,7 +106,7 @@ function _insertIntoHead(markup, tag) {
  * @param {function} getBundle Returns a promise for a computed bundle
  * @param {Object} pageOptions
  */
-function sendPage(routes, bundle, pageOptions) {
+function sendPage(routes, bundle, pageOptions, origin) {
   return function(req, res, next) {
     var router = new Router(routes),
         match = router.match(req.path);
@@ -119,9 +122,14 @@ function sendPage(routes, bundle, pageOptions) {
       options: pageOptions
     };
 
+    var reqOrigin = origin || (
+          (!!req.connection.verifyPeer ? 'https://' : 'http://') +
+          req.headers.host);
+    var location = url.parse(reqOrigin + req.originalUrl);
+
     bundle.js
       .then(function(result) {
-        return renderComponent(result, match.handler, props);
+        return renderComponent(result, match.handler, props, location);
       }).then(function(rendered) {
         rendered = _insertIntoHead(rendered.markup,
           _genClientRoutingCode(match.handler, rendered.props, routes) +
@@ -215,7 +223,7 @@ module.exports = function(routes, options) {
 
   app.get('/assets/app.js', sendScript(bundle));
   app.get('/assets/app.css', sendStyles(bundle));
-  app.use(sendPage(routes, bundle, options.pageOptions));
+  app.use(sendPage(routes, bundle, options.pageOptions, options.origin));
 
   return app;
 
