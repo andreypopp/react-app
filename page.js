@@ -54,7 +54,8 @@ module.exports = React.createClass({
       var props = {
         path: path,
         query: query,
-        params: match.params
+        params: match.params,
+        options: this.props.options
       };
       bootstrapComponent(match.handler, props, function(err, spec) {
         if (err) return callback(err);
