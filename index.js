@@ -193,7 +193,7 @@ module.exports = function(routes, options) {
     if (options.debug) {
       var start = Date.now();
       q.all(utils.values(bundle)).then(function() {
-        console.log('bundle built in', Date.now() - start, 'ms');
+        log('bundle built in', Date.now() - start, 'ms');
       });
     }
   }
