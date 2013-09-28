@@ -20,7 +20,8 @@
     "reactify": "git+https://github.com/andreypopp/reactify#master",
     "dcompose": "git+https://github.com/andreypopp/dcompose#master",
     "stream-aggregate-promise": "0.x.x",
-    "lodash": "2.x.x"
+    "lodash": "2.x.x",
+    "lodash.clonedeep": "~2.1.0"
   },
   "devDependencies": {
     "react-tools": "http://data.andreypopp.com/react-tools-0.5.0-alpha.tgz",

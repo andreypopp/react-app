@@ -23,9 +23,12 @@ function _genServerRenderingCode(module, props) {
     "var bootstrapComponent = require('react-app/bootstrap').bootstrapComponent;",
     "var Component = require(" + JSON.stringify(module) + ");",
     "var props = " + JSON.stringify(props) + ";",
+    "var cloneDeep = require('lodash.clonedeep');",
     "bootstrapComponent(Component, props, function(err, spec) {",
     "  if (err) return __react_app_callback(err);",
-    "  React.renderComponentToString(spec.Component(spec.props), function(markup) {",
+    "  React.renderComponentToString(",
+    "    spec.Component(cloneDeep(spec.props)),",
+    "    function(markup) {",
     "    __react_app_callback(null, {markup: markup, props: spec.props});",
     "  });",
     "});",
@@ -62,7 +65,6 @@ function renderComponent(bundle, module, props) {
       context = {
         __react_app_callback: promise.makeNodeResolver(),
         console: console,
-        XMLHttpRequest: XMLHttpRequest,
         self: {XMLHttpRequest: XMLHttpRequest}
       },
       contextify = require('contextify');
@@ -195,6 +197,7 @@ module.exports = function(routes, options) {
 
   var composer = new DCompose({
     entries: [
+      {id: require.resolve('lodash.clonedeep'), expose: 'lodash.clonedeep'},
       {id: 'react-tools/build/modules/React', expose: true},
       {id: path.join(__dirname, './bootstrap'), expose: 'react-app/bootstrap'},
     ].concat(pages),
