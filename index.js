@@ -178,7 +178,7 @@ function sendStyles(bundle) {
 module.exports = function(routes, options) {
   options = options || {};
 
-  var root = path.dirname(callsite()[1].getFileName()),
+  var root = options.root || path.dirname(callsite()[1].getFileName()),
       app = express(),
       bundle = {};
 
