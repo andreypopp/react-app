@@ -172,25 +172,25 @@ function sendStyles(bundle) {
  *    code changes
  *
  * @param {Object} routes Route table
- * @param {Object} options Options
+ * @param {Object} opts Options
  * @retuens {Object} Configured express application
  */
-module.exports = function(routes, options) {
-  options = options || {};
+module.exports = function(routes, opts) {
+  opts = opts || {};
 
-  var root = options.root || path.dirname(callsite()[1].getFileName()),
+  var root = opts.root || path.dirname(callsite()[1].getFileName()),
       app = express(),
       bundle = {};
 
   function log() {
-    if (options.debug) console.log.apply(console, arguments)
+    if (opts.debug) console.log.apply(console, arguments)
   }
 
   function buildBundle(detected) {
-    var streams = composer.all({debug: options.debug});
+    var streams = composer.all({debug: opts.debug});
     for (var k in streams)
       bundle[k] = aggregate(streams[k]);
-    if (options.debug) {
+    if (opts.debug) {
       var start = Date.now();
       q.all(utils.values(bundle)).then(function() {
         log('bundle built in', Date.now() - start, 'ms');
@@ -212,8 +212,8 @@ module.exports = function(routes, options) {
       {id: 'react-tools/build/modules/React', expose: true},
       {id: path.join(__dirname, './bootstrap'), expose: 'react-app/bootstrap'},
     ].concat(pages),
-    transform: [].concat(options.transforms, reactify),
-    watch: options.debug
+    transform: [].concat(opts.transforms, reactify),
+    watch: opts.debug
   });
 
 
@@ -223,7 +223,7 @@ module.exports = function(routes, options) {
 
   app.get('/assets/app.js', sendScript(bundle));
   app.get('/assets/app.css', sendStyles(bundle));
-  app.use(sendPage(routes, bundle, options.pageOptions, options.origin));
+  app.use(sendPage(routes, bundle, opts.pageOptions, opts.origin));
 
   return app;
 
