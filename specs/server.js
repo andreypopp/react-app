@@ -1,12 +1,34 @@
-var ok = require('assert').ok,
+var ok      = require('assert').ok,
+    express = require('express'),
     request = require('supertest'),
     makeApp = require('../index');
 
 describe('server rendering', function() {
 
-  var app = makeApp({
-    '/':            './fixtures/index.jsx',
-    '/pages/about': './fixtures/about.jsx'
+  var app = express();
+
+  app.get('/api/data', function(req, res) {
+    res.send({message: 'Hey there!'});
+  });
+  
+  app.use(makeApp({
+    '/':                './fixtures/index.jsx',
+    '/pages/about':     './fixtures/about.jsx',
+    '/pages/withdata':  './fixtures/withdata.jsx'
+  }));
+
+  it('renders page with data', function(done) {
+    request(app)
+      .get('/pages/withdata')
+      .expect(200)
+      .end(function(err, res) {
+        ok(!err);
+        ok(res.text.indexOf('</html>') > -1);
+        ok(res.text.indexOf('/assets/app.js') > -1);
+        ok(res.text.indexOf('/assets/app.css') > -1);
+        ok(res.text.indexOf('Hey there!') > -1);
+        done()
+      });
   });
 
   it('renders index page', function(done) {

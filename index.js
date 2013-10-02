@@ -6,17 +6,17 @@
  */
 "use strict";
 
-var path            = require('path'),
-    url             = require('url'),
-    express         = require('express'),
-    q               = require('kew'),
-    callsite        = require('callsite'),
-    XMLHttpRequest  = require('xhr2'),
-    DCompose        = require('dcompose'),
-    reactify        = require('reactify'),
-    aggregate       = require('stream-aggregate-promise'),
-    utils           = require('lodash'),
-    Router          = require('./router');
+var path                = require('path'),
+    url                 = require('url'),
+    express             = require('express'),
+    q                   = require('kew'),
+    callsite            = require('callsite'),
+    DCompose            = require('dcompose'),
+    reactify            = require('reactify'),
+    aggregate           = require('stream-aggregate-promise'),
+    utils               = require('lodash'),
+    makeXMLHttpRequest  = require('./xmlhttprequest'),
+    Router              = require('./router');
 
 function _genServerRenderingCode(module, props) {
   return [
@@ -64,6 +64,7 @@ function _genClientRoutingCode(handler, props, routes) {
  */
 function renderComponent(bundle, module, props, location) {
   var promise = q.defer(),
+      XMLHttpRequest = makeXMLHttpRequest(location),
       context = {
         __react_app_callback: promise.makeNodeResolver(),
         console: console,
