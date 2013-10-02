@@ -74,6 +74,10 @@ function renderComponent(bundle, module, props, location) {
         console: console,
         XMLHttpRequest: XMLHttpRequest,
         location: location,
+        setTimeout: setTimeout,
+        clearTimeout: clearTimeout,
+        setInterval: setInterval,
+        clearInterval: clearInterval
       },
       contextify = require('contextify');
 
