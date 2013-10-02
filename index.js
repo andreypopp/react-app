@@ -21,6 +21,8 @@ var path                = require('path'),
 
 function _genServerRenderingCode(module, props) {
   return [
+    "var ExecutionEnvironment = require('react-tools/build/modules/ExecutionEnvironment');",
+    "ExecutionEnvironment.canUseDOM = false;",
     "var React = require('react-tools/build/modules/React');",
     "var bootstrapComponent = require('react-app/bootstrap').bootstrapComponent;",
     "var Component = require(" + JSON.stringify(module) + ");",
@@ -72,10 +74,11 @@ function renderComponent(bundle, module, props, location) {
         console: console,
         XMLHttpRequest: XMLHttpRequest,
         location: location,
-        self: {XMLHttpRequest: XMLHttpRequest}
       },
       contextify = require('contextify');
 
+  context.self = context;
+  context.window = context;
 
   dom.on('error', promise.reject.bind(promise));
   dom.run(function() {
@@ -211,15 +214,17 @@ module.exports = function(routes, opts) {
   for (var k in routes) {
     pages.push({
       id: routes[k][0] === '.' ?  path.resolve(root, routes[k]) : routes[k],
-      expose: routes[k]
+      expose: routes[k],
+      entry: false
     });
   }
 
   var composer = new DCompose({
     entries: [
-      {id: require.resolve('lodash.clonedeep'), expose: 'lodash.clonedeep'},
-      {id: 'react-tools/build/modules/React', expose: true},
-      {id: path.join(__dirname, './bootstrap'), expose: 'react-app/bootstrap'},
+      {id: require.resolve('lodash.clonedeep'), expose: 'lodash.clonedeep', entry: false},
+      {id: 'react-tools/build/modules/React', expose: true, entry: false},
+      {id: 'react-tools/build/modules/ExecutionEnvironment', expose: true, entry: false},
+      {id: path.join(__dirname, './bootstrap'), expose: 'react-app/bootstrap', entry: false},
     ].concat(pages),
     transform: [].concat(opts.transforms, reactify),
     watch: opts.debug
