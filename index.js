@@ -7,6 +7,7 @@
 "use strict";
 
 var path                = require('path'),
+    domain              = require('domain'),
     url                 = require('url'),
     express             = require('express'),
     q                   = require('kew'),
@@ -63,7 +64,8 @@ function _genClientRoutingCode(handler, props, routes) {
  * @returns {String} Rendered React component
  */
 function renderComponent(bundle, module, props, location) {
-  var promise = q.defer(),
+  var dom = domain.create(),
+      promise = q.defer(),
       XMLHttpRequest = makeXMLHttpRequest(location),
       context = {
         __react_app_callback: promise.makeNodeResolver(),
@@ -73,9 +75,15 @@ function renderComponent(bundle, module, props, location) {
         self: {XMLHttpRequest: XMLHttpRequest}
       },
       contextify = require('contextify');
-  contextify(context);
-  context.run(bundle);
-  context.run(_genServerRenderingCode(module, props));
+
+
+  dom.on('error', promise.reject.bind(promise));
+  dom.run(function() {
+    contextify(context);
+    context.run(bundle);
+    context.run(_genServerRenderingCode(module, props));
+  });
+
   return promise.then(function(result) {
     // if we dispose context on the current tick we will crash cause Node didn't
     // free some I/O handles yet
