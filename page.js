@@ -41,6 +41,7 @@ function shallowEqual(objA, objB) {
 module.exports = React.createClass({
 
   componentDidMount: function() {
+    window.ReactApp = this;
     window.addEventListener('popstate', this.onPopState);
   },
 
@@ -49,33 +50,25 @@ module.exports = React.createClass({
   },
 
   activeContents: function(path, query, callback) {
-    var match = this.props.router.match(path);
-    if (match) {
+  },
+
+  loadURL: function(path, query) {
+    if (path !== this.props.path || !shallowEqual(query, this.props.query)) {
+      var match = this.props.router.match(path);
+      if (!match) return;
+
       var props = {
         path: path,
         query: query,
         params: match.params,
-        options: this.props.options
+        options: this.props.options,
+        router: this.props.router
       };
       bootstrapComponent(match.handler, props, function(err, spec) {
         if (err) return callback(err);
-        var result = spec.Component(spec.props)
-          .render()
-          .getInitialState()
-          .contents;
-        callback(null, result);
-      });
-    }
-  },
-
-  loadURL: function(path, query) {
-    if (path !== this.state.path || !shallowEqual(query, this.state.query)) {
-      this.activeContents(path, query, function(err, contents) {
-        this.setState({
-          path: path,
-          query: query,
-          contents: contents
-        });
+        props.router = this.props.router;
+        console.log(document, document.documentElement);
+        React.renderComponent(spec.Component(spec.props), document);
       }.bind(this));
     }
   },
@@ -87,6 +80,15 @@ module.exports = React.createClass({
     }
     window.history.pushState(null, '', completeURL);
     this.loadURL(path, query);
+  },
+
+  setQuery: function(query) {
+    var newQuery = {};
+    for (var k in this.props.query)
+      newQuery[k] = this.props.query[k];
+    for (var k in query)
+      newQuery[k] = query[k];
+    this.navigate(this.props.path, query);
   },
 
   onPopState: function(e) {
@@ -111,15 +113,7 @@ module.exports = React.createClass({
     }
   },
 
-  getInitialState: function() {
-    return {
-      path: this.props.path,
-      query: this.props.query,
-      contents: this.props.children
-    };
-  },
-
   render: function() {
-    return React.DOM.html({onClick: this.onNavigate}, this.state.contents);
+    return React.DOM.html({onClick: this.onNavigate}, this.props.children);
   }
 });
