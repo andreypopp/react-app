@@ -1,0 +1,82 @@
+#!/usr/bin/env node
+
+var reactApp  = require('./index'),
+    version   = require('./package.json').version,
+    fs        = require('fs'),
+    p         = require('path'),
+    wrap      = require('wordwrap')(79),
+    optimist  = require('optimist')
+      .usage('$0 [options]')
+      .option('h', {
+        alias: 'help',
+        boolean: true,
+        describe: 'Show this message and exit'
+      })
+      .option('v', {
+        alias: 'version',
+        boolean: true,
+        describe: 'Show version'
+      })
+      .option('d', {
+        alias: 'debug',
+        boolean: true,
+        describe: 'Run in debug mode'
+      })
+      .option('p', {
+        alias: 'port',
+        describe: 'Port to use (default: 3000)'
+      })
+      .option('host', {
+        describe: 'Host to use (default: localhost)'
+      })
+      .option('t', {
+        alias: 'transform',
+        describe: 'Apply dcompose transform'
+      })
+      .option('routes', {
+        describe: 'Use routes definition'
+      })
+
+if (optimist.argv.help) return optimist.showHelp();
+if (optimist.argv.version) return console.log(version);
+
+var argv = optimist.argv,
+    routes = readRoutes(argv),
+    app = createApp(routes, argv);
+
+app.listen(argv.port || 3000, argv.host || 'localhost');
+
+function createApp(routes, argv) {
+  var app = reactApp(routes, {debug: argv.debug});
+  return app;
+}
+
+function readRoutes(argv) {
+  if (!argv._.length === 0)
+    error('provide routes as argument');
+
+  var arg = argv._[0] || '.';
+
+  if (fs.statSync(arg).isDirectory()) {
+    var files = fs.readdirSync(arg);
+    var routes = {};
+    files
+      .map(function(r) { return {id: r, filename: p.resolve(arg, r)}; })
+      .filter(isPage)
+      .forEach(function(r) {
+        routes['/' + r.id.replace(/\.jsx?/, '')] = r.filename;
+      });
+    return routes;
+  } else {
+    return require(p.resolve(arg));
+  }
+}
+
+function isPage(r) {
+  return fs.statSync(r.filename).isFile() && r.id.match(/\.jsx?/);
+}
+
+function error(msg) {
+  console.error(wrap('error: ' + msg));
+  process.exit(1);
+}
