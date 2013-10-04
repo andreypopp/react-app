@@ -7,23 +7,32 @@
 require('./styles.css');
 
 var React = require('react-tools/build/modules/React'),
-    Page = require('../../page.js'),
+    createPage = require('../../page'),
     DebugInfo = require('./debug_info.jsx');
 
-module.exports = React.createClass({
+module.exports = createPage({
+  onClick: function() {
+    console.log('y');
+  },
+  pageDidMount: function() {
+    console.log('mount');
+  },
+  pageWillUnmount: function() {
+    console.log('unmount');
+  },
   render: function() {
     var debugInfo = this.transferPropsTo(DebugInfo());
-    return this.transferPropsTo(
-      <Page>
+    return (
+      <html>
         <head>
           <title>Index</title>
         </head>
-        <body>
+        <body onClick={this.onClick}>
           <h1>Hello, index!</h1>
-          <a href="/pages/about"><i class="icon icon-pencil"></i> About page</a>
+          <a href="/pages/about"><i className="icon icon-pencil"></i> About page</a>
           {debugInfo}
         </body>
-      </Page>
+      </html>
     );
   }
 });

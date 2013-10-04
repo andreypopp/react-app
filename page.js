@@ -8,7 +8,9 @@
 
 var qs = require('querystring'),
     React = require('react-tools/build/modules/React'),
-    bootstrapComponent = require('./bootstrap').bootstrapComponent;
+    bootstrap = require('./bootstrap'),
+    ReactEventEmitter = require('react-tools/build/modules/ReactEventEmitter'),
+    ReactComponent = require('react-tools/build/modules/ReactComponent');
 
 /**
  * Shallow equality test
@@ -38,18 +40,21 @@ function shallowEqual(objA, objB) {
   return true;
 }
 
-module.exports = React.createClass({
+var Page = React.createClass({
+  render: function() {
+    return this.props.spec.render.call(this);
+  },
 
   componentDidMount: function() {
-    window.ReactApp = this;
     window.addEventListener('popstate', this.onPopState);
+    window.addEventListener('click', this.onNavigate);
+    if (this.props.spec.pageDidMount) this.props.spec.pageDidMount();
   },
 
   componentWillUnmount: function() {
     window.removeEventListener('popstate', this.onPopState);
-  },
-
-  activeContents: function(path, query, callback) {
+    window.removeEventListener('click', this.onNavigate);
+    if (this.props.spec.pageWillUnmount) this.props.spec.pageWillUnmount();
   },
 
   loadURL: function(path, query) {
@@ -59,16 +64,16 @@ module.exports = React.createClass({
 
       var props = {
         path: path,
-        query: query,
-        params: match.params,
+        query: query || {},
+        params: match.params || {},
         options: this.props.options,
         router: this.props.router
       };
-      bootstrapComponent(match.handler, props, function(err, spec) {
+      bootstrap.bootstrapComponent(match.handler, props, function(err, spec) {
         if (err) return callback(err);
-        props.router = this.props.router;
-        console.log(document, document.documentElement);
+        if (this.props.spec.pageWillUnmount) this.props.spec.pageWillUnmount();
         React.renderComponent(spec.Component(spec.props), document);
+        if (this.props.spec.pageDidMount) this.props.spec.pageDidMount();
       }.bind(this));
     }
   },
@@ -88,7 +93,7 @@ module.exports = React.createClass({
       newQuery[k] = this.props.query[k];
     for (var k in query)
       newQuery[k] = query[k];
-    this.navigate(this.props.path, query);
+    this.navigate(this.props.path, newQuery);
   },
 
   onPopState: function(e) {
@@ -111,9 +116,25 @@ module.exports = React.createClass({
       }
       current = current.parentNode;
     }
-  },
-
-  render: function() {
-    return React.DOM.html({onClick: this.onNavigate}, this.props.children);
   }
 });
+
+function bindSpec(spec, component) {
+  var boundSpec = Object.create(component);
+  for (var id in spec)
+    if (typeof spec[id] === 'function')
+      boundSpec[id] = spec[id].bind(boundSpec)
+    else
+      boundSpec[id] = spec[id];
+  return boundSpec;
+}
+
+module.exports = function(spec) {
+  var factory = function(props, children) {
+    var page = Page(props, children);
+    props.spec = bindSpec(spec, page);
+    return page;
+  }
+  factory.spec = spec;
+  return factory;
+}

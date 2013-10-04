@@ -4,24 +4,29 @@
  *
  */
 
+require('./styles.css');
+
 var React = require('react-tools/build/modules/React'),
-    Page = require('../../page.js'),
+    createPage = require('../../page'),
     DebugInfo = require('./debug_info.jsx');
 
-module.exports = React.createClass({
+module.exports = createPage({
+  onClick: function() {
+    console.log('x');
+  },
   render: function() {
     var debugInfo = this.transferPropsTo(DebugInfo());
-    return this.transferPropsTo(
-      <Page>
+    return (
+      <html>
         <head>
           <title>About</title>
         </head>
-        <body>
+        <body onClick={this.onClick}>
           <h1>Hello, about!</h1>
           <a href="/">index</a>
           {debugInfo}
         </body>
-      </Page>
+      </html>
     );
   }
 });

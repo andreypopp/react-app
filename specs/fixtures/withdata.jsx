@@ -8,26 +8,8 @@
 require('./styles.css');
 
 var React = require('react-tools/build/modules/React'),
-    Page = require('../../page.js'),
+    createPage = require('../../page'),
     DebugInfo = require('./debug_info.jsx');
-
-var Component = React.createClass({
-  render: function() {
-    var debugInfo = this.transferPropsTo(DebugInfo());
-    return this.transferPropsTo(
-      <Page>
-        <head>
-          <title>{this.props.message}</title>
-        </head>
-        <body>
-          <h1>Hello, index!</h1>
-          <a href="/pages/about"><i class="icon icon-pencil"></i> About page</a>
-          {debugInfo}
-        </body>
-      </Page>
-    );
-  }
-});
 
 function request(url, cb) {
   var xhr = new global.XMLHttpRequest(),
@@ -44,9 +26,25 @@ function request(url, cb) {
   xhr.send();
 }
 
-module.exports = {
-  Component: Component,
+module.exports = createPage({
+
+  render: function() {
+    var debugInfo = this.transferPropsTo(DebugInfo());
+    return this.transferPropsTo(
+      <html>
+        <head>
+          <title>{this.props.message}</title>
+        </head>
+        <body>
+          <h1>Hello, index!</h1>
+          <a href="/pages/about"><i class="icon icon-pencil"></i> About page</a>
+          {debugInfo}
+        </body>
+      </html>
+    );
+  },
+
   getData: function(props, cb) {
     request('/api/data', cb);
   }
-}
+});

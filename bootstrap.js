@@ -9,16 +9,15 @@ var ReactMount = require('react-tools/build/modules/ReactMount'),
     React = require('react-tools/build/modules/React'),
     Router = require('./router');
 
-module.exports = function(Component, props, routes) {
-  var component = Component.Component || Component;
-  props.router = new Router(routes);
-  ReactMount.allowFullPageRender = true;
+ReactMount.allowFullPageRender = true;
 
+function bootstrap(Component, props, routes) {
+  if (routes) props.router = new Router(routes);
   if (document.readyState == 'interactive') {
-    React.renderComponent(component(props), document);
+    window.ReactAppPage = React.renderComponent(Component(props), document);
   } else {
     window.addEventListener('DOMContentLoaded', function() {
-      React.renderComponent(component(props), document);
+      window.ReactAppPage = React.renderComponent(Component(props), document);
     });
   }
 }
@@ -33,17 +32,16 @@ module.exports = function(Component, props, routes) {
  * @param {Object} props
  * @param {Callback} callback
  */
-module.exports.bootstrapComponent = function(Component, props, callback) {
-  if (typeof Component.getData === 'function') {
-    var getData = Component.getData,
-        component = Component.Component;
+function bootstrapComponent(Component, props, callback) {
+  if (typeof Component.spec.getData === 'function') {
+    var getData = Component.spec.getData;
 
     var onSuccess = function(data) {
       var newProps = {};
       for (var x in props) newProps[x] = props[x];
       if (data)
         for (var y in data) newProps[y] = data[y];
-      callback(null, {Component: component, props: newProps});
+      callback(null, {Component: Component, props: newProps});
     }
 
     var onError = function(err) {
@@ -61,3 +59,6 @@ module.exports.bootstrapComponent = function(Component, props, callback) {
     callback(null, {Component: Component, props: props});
   }
 }
+
+module.exports = bootstrap;
+bootstrap.bootstrapComponent = bootstrapComponent;

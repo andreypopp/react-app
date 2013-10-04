@@ -38,12 +38,21 @@ Now create `index_page` and `about_page` components:
     */
 
     var React = require('react-tools/build/modules/React'),
-        Page = require('react-app/page.js');
+        createPage = require('react-app/page');
 
-    module.exports = React.createClass({
+    module.exports = createPage({
+      pageDidMount: function() {
+        console.log('mount!');
+      },
+      pageDidUnmount: function() {
+        console.log('unmount!');
+      },
+      getData: function(props, done) {
+        done(null, {someDataFromNetwork: 'Yep!'});
+      },
       render: function() {
-        return this.transferPropsTo(
-          <Page>
+        return (
+          <html>
             <head>
               <title>Index</title>
             </head>
@@ -51,7 +60,7 @@ Now create `index_page` and `about_page` components:
               <h1>Hello, index!</h1>
               <a href="/pages/about">About page</a>
             </body>
-          </Page>
+          </html>
         );
       }
     });
@@ -65,12 +74,12 @@ Now create `index_page` and `about_page` components:
     */
 
     var React = require('react-tools/build/modules/React'),
-        Page = require('react-app/page.js');
+        createPage = require('react-app/page');
 
-    module.exports = React.createClass({
+    module.exports = createPage({
       render: function() {
-        return this.transferPropsTo(
-          <Page>
+        return (
+          <html>
             <head>
               <title>About</title>
             </head>
@@ -78,7 +87,7 @@ Now create `index_page` and `about_page` components:
               <h1>Hello, about!</h1>
               <a href="/">index</a>
             </body>
-          </Page>
+          </html>
         );
       }
     });
