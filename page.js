@@ -57,6 +57,10 @@ var Page = React.createClass({
     if (this.props.spec.pageWillUnmount) this.props.spec.pageWillUnmount();
   },
 
+  componentWillReceiveProps: function(props) {
+    props.spec = bindSpec(props.unboundSpec, this);
+  },
+
   loadURL: function(path, query) {
     if (path !== this.props.path || !shallowEqual(query, this.props.query)) {
       var match = this.props.router.match(path);
@@ -132,6 +136,7 @@ function bindSpec(spec, component) {
 module.exports = function(spec) {
   var factory = function(props, children) {
     var page = Page(props, children);
+    props.unboundSpec = spec;
     props.spec = bindSpec(spec, page);
     return page;
   }
