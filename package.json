@@ -21,7 +21,7 @@
     "kew": "~0.1.7",
     "callsite": "~1.0.0",
     "reactify": "git+https://github.com/andreypopp/reactify#master",
-    "dcompose": "~0.1.2",
+    "dcompose": "~0.2.0",
     "stream-aggregate-promise": "0.x.x",
     "lodash": "2.x.x",
     "lodash.clonedeep": "~2.1.0",
