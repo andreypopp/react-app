@@ -24,8 +24,8 @@ describe('server rendering', function() {
       .end(function(err, res) {
         ok(!err);
         ok(res.text.indexOf('</html>') > -1);
-        ok(res.text.indexOf('/assets/app.js') > -1);
-        ok(res.text.indexOf('/assets/app.css') > -1);
+        ok(res.text.indexOf('/assets/bundle.js') > -1);
+        ok(res.text.indexOf('/assets/bundle.css') > -1);
         ok(res.text.indexOf('Hey there!') > -1);
         done()
       });
@@ -38,8 +38,8 @@ describe('server rendering', function() {
       .end(function(err, res) {
         ok(!err);
         ok(res.text.indexOf('</html>') > -1);
-        ok(res.text.indexOf('/assets/app.js') > -1);
-        ok(res.text.indexOf('/assets/app.css') > -1);
+        ok(res.text.indexOf('/assets/bundle.js') > -1);
+        ok(res.text.indexOf('/assets/bundle.css') > -1);
         ok(res.text.indexOf('Hello, index!') > -1);
         done()
       });
@@ -52,8 +52,8 @@ describe('server rendering', function() {
       .end(function(err, res) {
         ok(!err);
         ok(res.text.indexOf('</h1>') > -1);
-        ok(res.text.indexOf('/assets/app.js') > -1);
-        ok(res.text.indexOf('/assets/app.css') > -1);
+        ok(res.text.indexOf('/assets/bundle.js') > -1);
+        ok(res.text.indexOf('/assets/bundle.css') > -1);
         ok(res.text.indexOf('Hello, about!') > -1);
         done()
       });
@@ -61,7 +61,7 @@ describe('server rendering', function() {
 
   it('renders client side code', function(done) {
     request(app)
-      .get('/assets/app.js')
+      .get('/assets/bundle.js')
       .expect(200)
       .end(function(err, res) {
         ok(!err);
@@ -74,7 +74,7 @@ describe('server rendering', function() {
 
   it('renders styles', function(done) {
     request(app)
-      .get('/assets/app.css')
+      .get('/assets/bundle.css')
       .expect(200)
       .end(function(err, res) {
         ok(!err);

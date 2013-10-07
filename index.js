@@ -13,6 +13,7 @@ var path                = require('path'),
     q                   = require('kew'),
     callsite            = require('callsite'),
     Composer            = require('dcompose'),
+    serveBundle         = require('dcompose/middleware'),
     reactify            = require('reactify'),
     aggregate           = require('stream-aggregate-promise'),
     utils               = require('lodash'),
@@ -123,7 +124,7 @@ function _insertIntoHead(markup, tag) {
  * @param {function} getBundle Returns a promise for a computed bundle
  * @param {Object} pageOptions
  */
-function sendPage(routes, bundle, pageOptions, origin) {
+function sendPage(routes, bundle, opts) {
   return function(req, res, next) {
     var router = new Router(routes),
         match = router.match(req.path);
@@ -136,10 +137,10 @@ function sendPage(routes, bundle, pageOptions, origin) {
       path: req.path,
       query: req.query,
       params: match.params,
-      options: pageOptions
+      options: opts.pageOptions
     };
 
-    var reqOrigin = origin || (
+    var reqOrigin = opts.origin || (
           (!!req.connection.verifyPeer ? 'https://' : 'http://') +
           req.headers.host);
     var location = url.parse(reqOrigin + req.originalUrl);
@@ -151,35 +152,10 @@ function sendPage(routes, bundle, pageOptions, origin) {
       }).then(function(rendered) {
         rendered = _insertIntoHead(rendered.markup,
           _genClientRoutingCode(match.handler, rendered.props, routes) +
-          '<link rel="stylesheet" href="/assets/app.css">' +
-          '<script async onload="__bootstrap();" src="/assets/app.js"></script>')
+          '<link rel="stylesheet" href="' + opts.assetsUrl + '/bundle.css">' +
+          '<script async onload="__bootstrap();" src="' + opts.assetsUrl + '/bundle.js"></script>')
         return res.send(rendered);
       }).fail(next);
-  };
-}
-
-/**
- * Send computed script bundle.
- *
- * @param {function} bundle returns a promise for a computed bundle
- */
-function sendScript(bundle) {
-  return function(req, res, next) {
-    res.setHeader('Content-Type', 'application/json');
-    bundle()
-      .then(function(bundles) { return bundles['bundle.js']; })
-      .then(function(bundle) { res.send(bundle) })
-      .fail(next);
-  };
-}
-
-function sendStyles(bundle) {
-  return function(req, res, next) {
-    res.setHeader('Content-Type', 'text/css');
-    bundle()
-      .then(function(bundles) { return bundles['bundle.css']; })
-      .then(function(bundle) { res.send(bundle) })
-      .fail(next);
   };
 }
 
@@ -189,37 +165,24 @@ function sendStyles(bundle) {
  *
  * Route table should be in form of {route pattern: node module id}.
  *
- * Available option keys are:
- *
- *  - `configureBundle` configures browserify bundle
- *  - `debug` inserts source maps into bundle and starts watching for source
- *    code changes
- *
  * @param {Object} routes Route table
  * @param {Object} opts Options
  * @retuens {Object} Configured express application
  */
 module.exports = function(routes, opts) {
-  opts = opts || {};
+  opts = utils.assign({
+    origin: undefined,
+    root: undefined,
+    assetsUrl: '/assets',
+    transforms: [],
+    debug: false,
+    pageOptions: undefined
+  }, opts);
 
   var root = opts.root || path.dirname(callsite()[1].getFileName()),
-      app = express(),
-      bundle = null;
+      app = express();
 
-  function buildBundle() {
-    bundle = composer.bundle().then(function(bundles) {
-      var aggregated = {};
-      for (var k in bundles)
-        aggregated[k] = aggregate(bundles[k]);
-      return aggregated;
-    });
-  }
-
-  function getBundle() {
-    return bundle;
-  }
-
-  var pages = []
+  var pages = [];
   for (var k in routes) {
     pages.push({
       id: routes[k][0] === '.' ?  path.resolve(root, routes[k]) : routes[k],
@@ -240,13 +203,11 @@ module.exports = function(routes, opts) {
       debug: opts.debug
     });
 
-  composer.on('update', buildBundle);
+  var bundleServer = serveBundle(composer),
+      getBundle = function() { return bundleServer.bundle; };
 
-  buildBundle();
-
-  app.get('/assets/app.js', sendScript(getBundle));
-  app.get('/assets/app.css', sendStyles(getBundle));
-  app.use(sendPage(routes, getBundle, opts.pageOptions, opts.origin));
+  app.use(opts.assetsUrl, bundleServer);
+  app.use(sendPage(routes, getBundle, opts));
 
   return app;
 
