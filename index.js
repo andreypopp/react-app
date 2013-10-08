@@ -12,8 +12,8 @@ var path                = require('path'),
     express             = require('express'),
     q                   = require('kew'),
     callsite            = require('callsite'),
-    Composer            = require('dcompose'),
-    serveBundle         = require('dcompose/middleware'),
+    dcompose            = require('dcompose'),
+    dcomposeMiddleware  = require('dcompose-middleware'),
     reactify            = require('reactify'),
     aggregate           = require('stream-aggregate-promise'),
     utils               = require('lodash'),
@@ -191,7 +191,7 @@ module.exports = function(routes, opts) {
     });
   }
 
-  var composer = new Composer(
+  var composer = dcompose(
     [
       {id: require.resolve('lodash.clonedeep'), expose: 'lodash.clonedeep', entry: false},
       {id: 'react-tools/build/modules/React', expose: true, entry: false},
@@ -203,7 +203,7 @@ module.exports = function(routes, opts) {
       debug: opts.debug
     });
 
-  var bundleServer = serveBundle(composer),
+  var bundleServer = dcomposeMiddleware(composer),
       getBundle = function() { return bundleServer.bundle; };
 
   app.use(opts.assetsUrl, bundleServer);
