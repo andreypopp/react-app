@@ -8,6 +8,7 @@
 
 var path                = require('path'),
     domain              = require('domain'),
+    fs                  = require('fs'),
     url                 = require('url'),
     express             = require('express'),
     q                   = require('kew'),
@@ -17,8 +18,13 @@ var path                = require('path'),
     reactify            = require('reactify'),
     aggregate           = require('stream-aggregate-promise'),
     utils               = require('lodash'),
+    SourceMapConsumer   = require('source-map').SourceMapConsumer,
     makeXMLHttpRequest  = require('./xmlhttprequest'),
     Router              = require('./router');
+
+var _MAP_STACK_TRACES = fs.readFileSync(
+  path.join(__dirname, './prepare-stack-trace.js'),
+  'utf8')
 
 function _genServerRenderingCode(module, props) {
   return [
@@ -57,6 +63,30 @@ function _genClientRoutingCode(handler, props, routes) {
   ].join('\n');
 }
 
+function retrieveSourceMap(source) {
+  // Get the URL of the source map
+  var match = /\/\/[#@]\s*sourceMappingURL=(.*)\s*$/m.exec(source);
+  if (!match) return null;
+  var sourceMappingURL = match[1];
+
+  // Read the contents of the source map
+  var sourceMapData;
+  var dataUrlPrefix = "data:application/json;base64,";
+  if (sourceMappingURL.slice(0, dataUrlPrefix.length).toLowerCase() == dataUrlPrefix) {
+    // Support source map URL as a data url
+    sourceMapData = new Buffer(sourceMappingURL.slice(dataUrlPrefix.length), "base64").toString();
+  }
+
+  if (!sourceMapData) {
+    return null;
+  }
+
+  return {
+    url: sourceMappingURL,
+    map: new SourceMapConsumer(sourceMapData)
+  };
+};
+
 /**
  * Render React component into string.
  *
@@ -66,7 +96,7 @@ function _genClientRoutingCode(handler, props, routes) {
  * @param {Object} location
  * @returns {String} Rendered React component
  */
-function renderComponent(bundle, module, props, location) {
+function renderComponent(bundle, module, props, location, opts) {
   var dom = domain.create(),
       promise = q.defer(),
       XMLHttpRequest = makeXMLHttpRequest(location),
@@ -82,6 +112,9 @@ function renderComponent(bundle, module, props, location) {
       },
       contextify = require('contextify');
 
+  if (opts.debug)
+    context.__react_app_sourceMap = retrieveSourceMap(bundle);
+
   context.self = context;
   context.window = context;
   context.global = context;
@@ -89,6 +122,8 @@ function renderComponent(bundle, module, props, location) {
   dom.on('error', promise.reject.bind(promise));
   dom.run(function() {
     contextify(context);
+    if (opts.debug)
+      context.run(_MAP_STACK_TRACES);
     context.run(bundle);
     context.run(_genServerRenderingCode(module, props));
   });
@@ -148,7 +183,7 @@ function sendPage(routes, bundle, opts) {
     bundle()
       .then(function(bundles) { return bundles['bundle.js']; })
       .then(function(bundle) {
-        return renderComponent(bundle, match.handler, props, location);
+        return renderComponent(bundle, match.handler, props, location, opts);
       }).then(function(rendered) {
         rendered = _insertIntoHead(rendered.markup,
           _genClientRoutingCode(match.handler, rendered.props, routes) +
@@ -172,20 +207,19 @@ function sendPage(routes, bundle, opts) {
 module.exports = function(routes, opts) {
   opts = utils.assign({
     origin: undefined,
-    root: undefined,
+    root: path.dirname(callsite()[1].getFileName()),
     assetsUrl: '/assets',
     transforms: [],
     debug: false,
     pageOptions: undefined
   }, opts);
 
-  var root = opts.root || path.dirname(callsite()[1].getFileName()),
-      app = express();
+  var app = express();
 
   var pages = [];
   for (var k in routes) {
     pages.push({
-      id: routes[k][0] === '.' ?  path.resolve(root, routes[k]) : routes[k],
+      id: routes[k][0] === '.' ?  path.resolve(opts.root, routes[k]) : routes[k],
       expose: routes[k],
       entry: false
     });
