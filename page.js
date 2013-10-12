@@ -133,7 +133,7 @@ var Page = React.createClass({
         cb(null, data);
       }.bind(this))
     else
-      cb(null, this);
+      cb(null, {});
   }
 });
 
