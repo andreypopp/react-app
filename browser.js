@@ -7,7 +7,7 @@ var getReactRootElementInContainer = require(
     createPage = require('./page'),
     createRouter = require('./router');
 
-function createPage() {
+function currentPage() {
   var id = getReactRootElementInContainer(document);
   id = id && ReactMount.getID(id);
   return ReactMount._instancesByReactRootID[id];
@@ -18,5 +18,5 @@ module.exports = {
   createRouter: createRouter,
   renderPage: bootstrap.renderPage,
   renderPageToString: bootstrap.renderPageToString,
-  currentPage: createPage
+  currentPage: currentPage
 };
