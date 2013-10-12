@@ -209,7 +209,7 @@ module.exports = function(routes, opts) {
     origin: undefined,
     root: path.dirname(callsite()[1].getFileName()),
     assetsUrl: '/assets',
-    transforms: [],
+    transform: [],
     debug: false,
     pageOptions: undefined
   }, opts);
@@ -233,7 +233,7 @@ module.exports = function(routes, opts) {
       {id: path.join(__dirname, './bootstrap'), expose: 'react-app/bootstrap', entry: false},
     ].concat(pages),
     {
-      transform: [].concat(opts.transforms, reactify),
+      transform: [].concat(opts.transform, reactify),
       debug: opts.debug
     });
 
