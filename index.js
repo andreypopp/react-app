@@ -52,10 +52,11 @@ function _genClientRoutingCode(handler, props, routes) {
   return [
     "<script>",
     "  var __bootstrap = function() {",
+    "    global = window;",
+    "    var ReactApp = require('react-app');",
     "    var Page = require(" + JSON.stringify(handler) + ");",
     "    var props = " + JSON.stringify(filterProps(props)) + ";",
     "    var routes = " + JSON.stringify(routes) + ";",
-    "    var ReactApp = require('react-app');",
     "    for (var key in routes) {",
     "      routes[key] = require(routes[key]);",
     "    }",
