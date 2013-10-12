@@ -25,6 +25,14 @@ var _MAP_STACK_TRACES = fs.readFileSync(
   path.join(__dirname, './prepare-stack-trace.js'),
   'utf8')
 
+function filterProps(props) {
+  return {
+    request: props.request,
+    options: props.options,
+    data: props.data
+  };
+}
+
 function _genServerRenderingCode(module, props) {
   return [
     "var ExecutionEnvironment = require('react-tools/build/modules/ExecutionEnvironment');",
@@ -45,7 +53,7 @@ function _genClientRoutingCode(handler, props, routes) {
     "<script>",
     "  var __bootstrap = function() {",
     "    var Page = require(" + JSON.stringify(handler) + ");",
-    "    var props = " + JSON.stringify(props) + ";",
+    "    var props = " + JSON.stringify(filterProps(props)) + ";",
     "    var routes = " + JSON.stringify(routes) + ";",
     "    var ReactApp = require('react-app');",
     "    for (var key in routes) {",
@@ -165,9 +173,11 @@ function sendPage(routes, bundle, opts) {
     }
 
     var props = {
-      path: req.path,
-      query: req.query,
-      params: match.params,
+      request: {
+        path: req.path,
+        query: req.query,
+        params: match.params
+      },
       options: opts.pageOptions
     };
 

@@ -60,16 +60,19 @@ var Page = React.createClass({
   },
 
   loadURL: function(path, query) {
-    if (path !== this.props.path || !shallowEqual(query, this.props.query)) {
+    if (path !== this.props.request.path || !shallowEqual(query, this.props.request.query)) {
       var match = this.props.router.match(path);
       if (!match) return;
 
       var props = {
-        path: path,
-        query: query || {},
-        params: match.params || {},
+        request: {
+          path: path,
+          query: query || {},
+          params: match.params || {}
+        },
         options: this.props.options,
-        router: this.props.router
+        router: this.props.router,
+        unboundSpec: this.props.unboundSpec
       };
 
       var page = match.handler(props);
@@ -92,11 +95,11 @@ var Page = React.createClass({
 
   setQuery: function(query) {
     var k, newQuery = {}
-    for (k in this.props.query)
-      newQuery[k] = this.props.query[k];
+    for (k in this.props.request.query)
+      newQuery[k] = this.props.request.query[k];
     for (k in query)
       newQuery[k] = query[k];
-    this.navigate(this.props.path, newQuery);
+    this.navigate(this.props.request.path, newQuery);
   },
 
   onPopState: function(e) {
@@ -125,12 +128,11 @@ var Page = React.createClass({
     if (this.props.spec.getData)
       callbackOrPromise(this.props.spec.getData, function(err, data) {
         if (err) return cb(err);
-        for (var k in data)
-          this.props[k] = data[k];
-        cb(null, null);
+        this.props.data = data;
+        cb(null, this);
       }.bind(this))
     else
-      cb(null, null);
+      cb(null, this);
   }
 });
 

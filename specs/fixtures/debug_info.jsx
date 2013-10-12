@@ -11,9 +11,9 @@ module.exports = React.createClass({
   render: function() {
     return (
       <ul>
-        <li>path: {this.props.path}</li>
-        <li>query: {JSON.stringify(this.props.query)}</li>
-        <li>params: {JSON.stringify(this.props.params)}</li>
+        <li>path: {this.props.request.path}</li>
+        <li>query: {JSON.stringify(this.props.request.query)}</li>
+        <li>params: {JSON.stringify(this.props.request.params)}</li>
       </ul>
     );
   }

@@ -29,10 +29,10 @@ function request(url, cb) {
 module.exports = createPage({
   render: function() {
     var debugInfo = this.transferPropsTo(DebugInfo());
-    return this.transferPropsTo(
+    return (
       <html>
         <head>
-          <title>{this.props.message}</title>
+          <title>{this.props.data.message}</title>
         </head>
         <body>
           <h1>Hello, index!</h1>
