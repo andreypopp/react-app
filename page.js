@@ -126,7 +126,7 @@ var Page = React.createClass({
   },
 
   bootstrap: function(cb) {
-    if (this.props.spec.getData)
+    if (!this.props.data && this.props.spec.getData)
       callbackOrPromise(this.props.spec.getData, function(err, data) {
         if (err) return cb(err);
         this.props.data = cloneDeep(data);
