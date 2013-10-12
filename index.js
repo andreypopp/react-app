@@ -225,7 +225,7 @@ module.exports = function(routes, opts) {
     [
       {id: 'react-tools/build/modules/React', expose: true, entry: false},
       {id: 'react-tools/build/modules/ExecutionEnvironment', expose: true, entry: false},
-      {id: './browser', expose: 'react-app', entry: false}
+      {id: require.resolve('./browser'), expose: 'react-app', entry: false}
     ].concat(pages),
     {
       transform: [].concat(opts.transform, reactify),
