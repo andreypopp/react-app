@@ -19,13 +19,17 @@ function _renderPage(page, doc, cb) {
     });
 }
 
-function renderPage(page, doc, cb, dataReady) {
-  if (dataReady)
-    _renderPage(page, doc, cb)
+function renderPage(page, doc, cb) {
+  if (page.props.data)
+    _renderPage(page, doc, function(err, page) {
+      cb(err, page, page.props.data);
+    });
   else
     page.bootstrap(function(err, data) {
       if (err) return cb(err);
-      _renderPage(page, doc, cb);
+      _renderPage(page, doc, function(err, page) {
+        cb(err, page, data); 
+      });
     });
 }
 
@@ -33,13 +37,17 @@ function _renderPageToString(page, cb) {
   React.renderComponentToString(page, cb.bind(null, null));
 }
 
-function renderPageToString(page, cb, dataReady) {
-  if (dataReady)
-    _renderPageToString(page, cb)
+function renderPageToString(page, cb) {
+  if (page.props.data)
+    _renderPageToString(page, function(err, markup) {
+        cb(err, markup, page.props.data);
+    });
   else
     page.bootstrap(function(err, data) {
       if (err) return cb(err);
-      _renderPageToString(page, cb);
+      _renderPageToString(page, function(err, markup) {
+        cb(err, markup, data);
+      });
     });
 }
 

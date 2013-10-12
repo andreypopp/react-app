@@ -41,9 +41,9 @@ function _genServerRenderingCode(module, props) {
     "var Page = require(" + JSON.stringify(module) + ");",
     "var props = " + JSON.stringify(props) + ";",
     "var page = Page(props);",
-    "ReactApp.renderPageToString(page, function(err, markup) {",
+    "ReactApp.renderPageToString(page, function(err, markup, data) {",
     "  if (err) return __react_app_callback(err);",
-    "  __react_app_callback(null, {markup: markup, props: page.props});",
+    "  __react_app_callback(null, {markup: markup, data: data});",
     "});",
   ].join('\n');
 }
@@ -191,8 +191,9 @@ function sendPage(routes, bundle, opts) {
       .then(function(bundle) {
         return renderComponent(bundle, match.handler, props, location, opts);
       }).then(function(rendered) {
+        props.data = rendered.data;
         rendered = _insertIntoHead(rendered.markup,
-          _genClientRoutingCode(match.handler, rendered.props, routes) +
+          _genClientRoutingCode(match.handler, props, routes) +
           '<link rel="stylesheet" href="' + opts.assetsUrl + '/bundle.css">' +
           '<script async onload="__bootstrap();" src="' + opts.assetsUrl + '/bundle.js"></script>')
         return res.send(rendered);

@@ -8,6 +8,7 @@
 
 var qs = require('querystring'),
     React = require('react-tools/build/modules/React'),
+    cloneDeep = require('lodash.clonedeep'),
     renderPage = require('./bootstrap').renderPage;
 
 /**
@@ -128,8 +129,8 @@ var Page = React.createClass({
     if (this.props.spec.getData)
       callbackOrPromise(this.props.spec.getData, function(err, data) {
         if (err) return cb(err);
-        this.props.data = data;
-        cb(null, this);
+        this.props.data = cloneDeep(data);
+        cb(null, data);
       }.bind(this))
     else
       cb(null, this);
