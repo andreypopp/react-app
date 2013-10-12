@@ -8,9 +8,7 @@
 
 var qs = require('querystring'),
     React = require('react-tools/build/modules/React'),
-    bootstrap = require('./bootstrap'),
-    ReactEventEmitter = require('react-tools/build/modules/ReactEventEmitter'),
-    ReactComponent = require('react-tools/build/modules/ReactComponent');
+    renderPage = require('./bootstrap').renderPage;
 
 /**
  * Shallow equality test
@@ -73,10 +71,11 @@ var Page = React.createClass({
         options: this.props.options,
         router: this.props.router
       };
-      bootstrap.bootstrapComponent(match.handler, props, function(err, spec) {
-        if (err) return callback(err);
-        if (this.props.spec.pageWillUnmount) this.props.spec.pageWillUnmount();
-        React.renderComponent(spec.Component(spec.props), document);
+
+      var page = match.handler(props);
+      if (this.props.spec.pageWillUnmount) this.props.spec.pageWillUnmount();
+      renderPage(page, document, function(err, spec) {
+        if (err) throw err;
         if (this.props.spec.pageDidMount) this.props.spec.pageDidMount();
       }.bind(this));
     }
@@ -92,10 +91,10 @@ var Page = React.createClass({
   },
 
   setQuery: function(query) {
-    var newQuery = {};
-    for (var k in this.props.query)
+    var k, newQuery = {}
+    for (k in this.props.query)
       newQuery[k] = this.props.query[k];
-    for (var k in query)
+    for (k in query)
       newQuery[k] = query[k];
     this.navigate(this.props.path, newQuery);
   },
@@ -120,8 +119,27 @@ var Page = React.createClass({
       }
       current = current.parentNode;
     }
+  },
+
+  bootstrap: function(cb) {
+    if (this.props.spec.getData)
+      callbackOrPromise(this.props.spec.getData, function(err, data) {
+        if (err) return cb(err);
+        for (var k in data)
+          this.props[k] = data[k];
+        cb(null, null);
+      }.bind(this))
+    else
+      cb(null, null);
   }
 });
+
+function callbackOrPromise(func, cb) {
+  if (func.length === 1)
+    func(cb)
+  else
+    func().then(cb.bind(null, null), cb.bind(null))
+}
 
 function bindSpec(spec, component) {
   var boundSpec = Object.create(component);
@@ -135,9 +153,10 @@ function bindSpec(spec, component) {
 
 module.exports = function(spec) {
   var factory = function(props, children) {
-    var page = Page(props, children);
+    var page = Page(props, children),
+        boundSpec = bindSpec(spec, page);
     props.unboundSpec = spec;
-    props.spec = bindSpec(spec, page);
+    props.spec = boundSpec;
     return page;
   }
   factory.spec = spec;

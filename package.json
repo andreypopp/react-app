@@ -2,7 +2,8 @@
   "name": "react-app",
   "version": "0.0.0",
   "description": "Server side rendering for React apps with Express",
-  "main": "index",
+  "main": "./index.js",
+  "browser": "./browser.js",
   "scripts": {
     "test": "make test"
   },

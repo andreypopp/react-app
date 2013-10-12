@@ -16,7 +16,6 @@ var path                = require('path'),
     dcompose            = require('dcompose'),
     dcomposeMiddleware  = require('dcompose-middleware'),
     reactify            = require('reactify'),
-    aggregate           = require('stream-aggregate-promise'),
     utils               = require('lodash'),
     SourceMapConsumer   = require('source-map').SourceMapConsumer,
     makeXMLHttpRequest  = require('./xmlhttprequest'),
@@ -30,18 +29,13 @@ function _genServerRenderingCode(module, props) {
   return [
     "var ExecutionEnvironment = require('react-tools/build/modules/ExecutionEnvironment');",
     "ExecutionEnvironment.canUseDOM = false;",
-    "var React = require('react-tools/build/modules/React');",
-    "var bootstrapComponent = require('react-app/bootstrap').bootstrapComponent;",
-    "var Component = require(" + JSON.stringify(module) + ");",
+    "var ReactApp = require('react-app');",
+    "var Page = require(" + JSON.stringify(module) + ");",
     "var props = " + JSON.stringify(props) + ";",
-    "var cloneDeep = require('lodash.clonedeep');",
-    "bootstrapComponent(Component, props, function(err, spec) {",
+    "var page = Page(props);",
+    "ReactApp.renderPageToString(page, function(err, markup) {",
     "  if (err) return __react_app_callback(err);",
-    "  React.renderComponentToString(",
-    "    spec.Component(cloneDeep(spec.props)),",
-    "    function(markup) {",
-    "    __react_app_callback(null, {markup: markup, props: spec.props});",
-    "  });",
+    "  __react_app_callback(null, {markup: markup, props: page.props});",
     "});",
   ].join('\n');
 }
@@ -50,14 +44,16 @@ function _genClientRoutingCode(handler, props, routes) {
   return [
     "<script>",
     "  var __bootstrap = function() {",
-    "    var handler = require(" + JSON.stringify(handler) + ");",
+    "    var Page = require(" + JSON.stringify(handler) + ");",
     "    var props = " + JSON.stringify(props) + ";",
     "    var routes = " + JSON.stringify(routes) + ";",
-    "    var bootstrap = require('react-app/bootstrap');",
+    "    var ReactApp = require('react-app');",
     "    for (var key in routes) {",
     "      routes[key] = require(routes[key]);",
     "    }",
-    "    bootstrap(handler, props, routes);",
+    "    props.router = ReactApp.createRouter(routes);",
+    "    var page = Page(props);",
+    "    ReactApp.renderPage(page, document, function() {}, true);",
     "  };",
     "</script>"
   ].join('\n');
@@ -85,7 +81,7 @@ function retrieveSourceMap(source) {
     url: sourceMappingURL,
     map: new SourceMapConsumer(sourceMapData)
   };
-};
+}
 
 /**
  * Render React component into string.
@@ -227,10 +223,9 @@ module.exports = function(routes, opts) {
 
   var composer = dcompose(
     [
-      {id: require.resolve('lodash.clonedeep'), expose: 'lodash.clonedeep', entry: false},
       {id: 'react-tools/build/modules/React', expose: true, entry: false},
       {id: 'react-tools/build/modules/ExecutionEnvironment', expose: true, entry: false},
-      {id: path.join(__dirname, './bootstrap'), expose: 'react-app/bootstrap', entry: false},
+      {id: './browser', expose: 'react-app', entry: false}
     ].concat(pages),
     {
       transform: [].concat(opts.transform, reactify),

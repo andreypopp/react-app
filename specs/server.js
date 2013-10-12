@@ -15,7 +15,7 @@ describe('server rendering', function() {
     '/':                './fixtures/index.jsx',
     '/pages/about':     './fixtures/about.jsx',
     '/pages/withdata':  './fixtures/withdata.jsx'
-  }));
+  }, {debug: true}));
 
   it('renders page with data', function(done) {
     request(app)

@@ -27,7 +27,6 @@ function request(url, cb) {
 }
 
 module.exports = createPage({
-
   render: function() {
     var debugInfo = this.transferPropsTo(DebugInfo());
     return this.transferPropsTo(
@@ -44,7 +43,7 @@ module.exports = createPage({
     );
   },
 
-  getData: function(props, cb) {
+  getData: function(cb) {
     request('/api/data', cb);
   }
 });

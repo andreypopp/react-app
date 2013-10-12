@@ -1,3 +1,5 @@
+"use strict";
+
 var __prepareStackTrace = Error.prepareStackTrace;
 
 function prepareStackTrace(error, stack) {
@@ -14,8 +16,7 @@ function prepareStackTrace(error, stack) {
     if (position.source === undefined)
       position = __react_app_sourceMap.map.originalPositionFor(position);
 
-    return '    at ' + name
-        + ' (' + position.source + ':' + position.line + ':0)';
+    return '    at ' + name + ' (' + position.source + ':' + position.line + ':0)';
 
   }).join('\n');
   Error.prepareStackTrace = prepareStackTrace;

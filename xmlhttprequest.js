@@ -1,3 +1,5 @@
+"use strict";
+
 var BaseXMLHttpRequest  = require('xhr2'),
     inherits            = require('util').inherits,
     resolve = require('url').resolve;

@@ -6,59 +6,44 @@
 "use strict";
 
 var ReactMount = require('react-tools/build/modules/ReactMount'),
-    React = require('react-tools/build/modules/React'),
-    Router = require('./router');
+    React = require('react-tools/build/modules/React');
 
 ReactMount.allowFullPageRender = true;
 
-function bootstrap(Component, props, routes) {
-  if (routes) props.router = new Router(routes);
-  if (document.readyState == 'interactive') {
-    window.ReactAppPage = React.renderComponent(Component(props), document);
-  } else {
+function _renderPage(page, doc, cb) {
+  if (doc.readyState === 'interactive' || doc.readyState === 'complete')
+    cb(null, React.renderComponent(page, doc));
+  else
     window.addEventListener('DOMContentLoaded', function() {
-      window.ReactAppPage = React.renderComponent(Component(props), document);
+      cb(null, React.renderComponent(page, doc));
     });
-  }
 }
 
-/**
- * Bootstrap a component by fetching all initial data if needed.
- *
- * @param {Object} Component can be a reference to react component or an object
- * of type {Component: ..., getData: ...} whete Component is a reference to
- * react component and getData is a function which fetches needed data from a
- * component.
- * @param {Object} props
- * @param {Callback} callback
- */
-function bootstrapComponent(Component, props, callback) {
-  if (typeof Component.spec.getData === 'function') {
-    var getData = Component.spec.getData;
-
-    var onSuccess = function(data) {
-      var newProps = {};
-      for (var x in props) newProps[x] = props[x];
-      if (data)
-        for (var y in data) newProps[y] = data[y];
-      callback(null, {Component: Component, props: newProps});
-    }
-
-    var onError = function(err) {
-      callback(err);
-    }
-
-    if (getData.length === 1) {
-      getData(props).then(onSuccess, onError).end();
-    } else {
-      getData(props, function(err, data) {
-        err ? onError(err) : onSuccess(data);
-      });
-    }
-  } else {
-    callback(null, {Component: Component, props: props});
-  }
+function renderPage(page, doc, cb, dataReady) {
+  if (dataReady)
+    _renderPage(page, doc, cb)
+  else
+    page.bootstrap(function(err, data) {
+      if (err) return cb(err);
+      _renderPage(page, doc, cb);
+    });
 }
 
-module.exports = bootstrap;
-bootstrap.bootstrapComponent = bootstrapComponent;
+function _renderPageToString(page, cb) {
+  React.renderComponentToString(page, cb.bind(null, null));
+}
+
+function renderPageToString(page, cb, dataReady) {
+  if (dataReady)
+    _renderPageToString(page, cb)
+  else
+    page.bootstrap(function(err, data) {
+      if (err) return cb(err);
+      _renderPageToString(page, cb);
+    });
+}
+
+module.exports = {
+  renderPage: renderPage,
+  renderPageToString: renderPageToString
+}
