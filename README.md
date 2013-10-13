@@ -1,94 +1,165 @@
-# react-app
+# ReactApp
 
-Express application which serves pre-rendered React components and corresponding
-client code. Can be used for rapid experimentation and application development
-with React library.
+Convenience for [React][1] to develop applications which
 
-Main features:
+  * use HTML5 History API to navigate between pages
+  * can pre-render UI on a server to reduce "time to first tweet"
+  * use CommonJS to manage code (js/coffee/...) and stylesheet
+    (css/stylus/less/sass/...) dependencies in the browser
 
-  * UI pre-rendering on a server
-  * HTML5 History navigation
-  * Browserified client code bundles
-  * Debug mode which features fast bundle rebuilds and source map support
+[1]: https://facebook.github.io/react
 
-## Quickstart
+## Installation
 
-Install `react-app` npm module:
+You need both `react-app` and `react-tools` packages to be installed, the best
+way is to use npm:
 
-    % npm install git+https://github.com/andreypopp/react-app.git
+    % npm install react-app react-tools
 
-Initialise `react-app` express application with route table:
+## Usage
 
-    % cat <<EOF
-    var makeApp = require('react-app');
-    makeApp({
-      '/': './index_page.jsx',
-      '/about: './about_page.jsx'
-    }).listen(3000);
-    EOF > index.js
+ReactApp is designed to be scalable from basic applications needs to large-scale
+application development where you need high degree of freedom and want to make
+your own choices. ReactApp is neither a framework nor a library, it's is just a
+set of conveniences which you can accepts, reject or even replace by your
+following your decisions.
 
-Now create `index_page` and `about_page` components:
+### Basic usage
 
+The next option is to bootstrap your application with your own code:
 
-    % cat <<EOF
-    /**
-    *
-    * @jsx React.DOM
-    *
-    */
+    var ReactApp = require('ra'),
+        React = require('react-core');
 
-    var React = require('react-tools/build/modules/React'),
-        createPage = require('react-app/page');
-
-    module.exports = createPage({
-      pageDidMount: function() {
-        console.log('mount!');
-      },
-      pageDidUnmount: function() {
-        console.log('unmount!');
-      },
-      getData: function(props, done) {
-        done(null, {someDataFromNetwork: 'Yep!'});
-      },
+    var Page = React.createClass({
       render: function() {
         return (
           <html>
             <head>
-              <title>Index</title>
+              <title>{this.props.title}</title>
             </head>
             <body>
-              <h1>Hello, index!</h1>
-              <a href="/pages/about">About page</a>
+              {this.props.children}
             </body>
           </html>
         );
       }
     });
-    EOF> ./index_page.jsx
 
-    % cat <<EOF
-    /**
-    *
-    * @jsx React.DOM
-    *
-    */
+    module.exports = ReactApp.createApp({
+      routes: {
+        '/': ReactApp.createPage({
+          render: function() {
+            return (
+              <Page title={this.props.options.appName}>
+                <h1>Main Page</h1>
+              </Page>
+            );
+          }
+        }),
 
-    var React = require('react-tools/build/modules/React'),
-        createPage = require('react-app/page');
+        '/about': './pages/about.jsx',
 
-    module.exports = createPage({
-      render: function() {
-        return (
-          <html>
-            <head>
-              <title>About</title>
-            </head>
-            <body>
-              <h1>Hello, about!</h1>
-              <a href="/">index</a>
-            </body>
-          </html>
-        );
+        '/users/:username': ReactApp.createPage({
+          render: function() {
+            return (
+              <Page title={this.props.request.params.username}>
+                <h1>@{this.props.request.params.username</h1>
+              </Page>
+            );
+          }
+        })
+      },
+
+      start: function() {
+        this.setOptions({
+          appName: 'My App'
+        });
       }
     });
-    EOF > ./about_page.jsx
+
+Now you can produce code for your application with the following command:
+
+    % ra bundle ./index.jsx
+
+And create a host page:
+
+    <!doctype html>
+    <link rel="stylesheet" href="index.bundle.css" />
+    <script src="index.bundle.js"></script>
+    <script>
+      app = require('./index');
+      app.start();
+    </script>
+
+Or serve your app directly:
+
+    % ra serve ./index.jsx
+
+### Node.js middleware
+
+ReactApp provides with a Node.js middleware which helps you serving your app to
+a browser with pre-rendered UI and bundled assets:
+
+    var serveApp = require('ra/middleware');
+    var app = serveApp(
+      './index.jsx', {
+        options: {
+          appName: 'My App',
+          debug: true
+        }
+      });
+    app.listen(3000);
+
+Alternatively you can use separate middleware for assets and UI pre-rendering.
+
+    var serveAssets = require('ra/middleware/assets'),
+        serveUI = require('ra/middleware/ui'),
+        createBundler = require('ra/bundler'),
+        express = require('express');
+
+    var bundler = createBundler('./index.jsx', {debug: true}),
+        app = express();
+
+    app.use(serveAssets(bundler));
+    app.use(serveUI(bundler));
+    app.listen(3000);
+
+### Advanced asset management
+
+### Command line interface reference
+
+Help is accessible via `ra --help`:
+
+    % ra --help
+    Usage:
+      ra serve [serve options] app
+      ra bundle [bundle options] app
+
+    Common options:
+      --help/-h           Show this message and exit
+      --version/-v        Print ReactApp version and exit
+      --quiet             Do not print information and warning messages
+      --verbose           Print debug messages
+      --no-color          Do not colour output
+
+    Serve options:
+      --port/-p PORT      Port to use (default: 3000)
+      --host HOST         Host to use (default: localhost)
+      --debug/-d          Should app be served in debug mode
+
+    Bundle options:       options are the same as for dcompose bundler utility
+      -o, --output OUT    Set output directory
+      -w, --watch         Watch for changes and rebuild bundles
+                          (-o/--output must be supplied)
+
+      --debug/-d          Produce bundle with source maps
+      --graph             Produce only dependency graph and pring it on stdout
+
+      --transform/-t TR   Apply transform
+      --extension EXT     File extensions to treat as modules (default: .js)
+
+      --js                Produce bundle of JS dependency graph only
+                          (this is the default behaviour)
+      --css               Produce bundle of CSS dependency graph only
+      --all               Produce bundle of both CSS and JS dependency graphs
