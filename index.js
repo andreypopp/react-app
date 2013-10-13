@@ -192,11 +192,27 @@ function sendPage(routes, bundle, opts) {
       .then(function(bundle) {
         return renderComponent(bundle, match.handler, props, location, opts);
       }).then(function(rendered) {
+        var clientFeatureTest = (typeof opts.clientFeatureTest === 'function') ?
+          opts.clientFeatureTest : function () { return true; };
         props.data = rendered.data;
         rendered = _insertIntoHead(rendered.markup,
           _genClientRoutingCode(match.handler, props, routes) +
           '<link rel="stylesheet" href="' + opts.assetsUrl + '/bundle.css">' +
-          '<script async onload="__bootstrap();" src="' + opts.assetsUrl + '/bundle.js"></script>')
+          "<script type=\"text/javascript\">" +
+            "(function () {" +
+              "var bundleScript;" +
+              "if (" + clientFeatureTest.toString() + "()) {" +
+                "bundleScript = document.createElement('script');" +
+                "bundleScript.type = 'text/javascript';" +
+                "bundleScript.async = true;" +
+                "bundleScript.src = '" + opts.assetsUrl + "/bundle.js';" +
+                "bundleScript.addEventListener('load', __bootstrap);" +
+                "var scripts = document.getElementsByTagName('script');" +
+                "var thisScript = scripts[scripts.length - 1];" +
+                "thisScript.parentNode.insertBefore(bundleScript, thisScript);" +
+              "}" +
+            "}());" +
+          "</script>");
         return res.send(rendered);
       }).fail(next);
   };
