@@ -8,6 +8,7 @@
 
 var qs = require('querystring'),
     React = require('react-tools/build/modules/React'),
+    ExecutionEnvironment = require('react-tools/build/modules/ExecutionEnvironment'),
     cloneDeep = require('lodash.clonedeep'),
     renderPage = require('./bootstrap').renderPage;
 
@@ -80,6 +81,9 @@ var Page = React.createClass({
       if (this.props.spec.pageWillUnmount) this.props.spec.pageWillUnmount();
       renderPage(page, document, function(err, spec) {
         if (err) throw err;
+        this.bootstrap(function () {
+          this.setProps(this.props);
+        }.bind(this), true);
         if (this.props.spec.pageDidMount) this.props.spec.pageDidMount();
       }.bind(this));
     }
@@ -125,8 +129,9 @@ var Page = React.createClass({
     }
   },
 
-  bootstrap: function(cb) {
-    if (!this.props.data && this.props.spec.getData)
+  bootstrap: function(cb, isMounted) {
+    var getDataNow = !ExecutionEnvironment.canUseDOM || isMounted || !this.props.options.renderBeforeDataOnClient;
+    if (getDataNow && !this.props.data && this.props.spec.getData)
       callbackOrPromise(this.props.spec.getData, function(err, data) {
         if (err) return cb(err);
         this.props.data = cloneDeep(data);
