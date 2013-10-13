@@ -8,7 +8,7 @@
 require('./styles.css');
 
 var React = require('react-tools/build/modules/React'),
-    createPage = require('../../page'),
+    createPage = require('../../page').createPage,
     DebugInfo = require('./debug_info.jsx');
 
 function request(url, cb) {
@@ -18,7 +18,11 @@ function request(url, cb) {
   xhr.onreadystatechange = function() {
     if (4 == xhr.readyState && 0 !== xhr.status) {
       if (twoHundred.test(xhr.status)) cb(null, JSON.parse(xhr.responseText));
-      else cb(xhr, null);
+      else {
+        var err = new Error('error getting: ' + url);
+        err.xhr = xhr;
+        cb(err);
+      }
     }
   };
   xhr.onerror = function(e) { return cb(e, null); };
@@ -28,14 +32,14 @@ function request(url, cb) {
 
 module.exports = createPage({
   render: function() {
-    var debugInfo = this.transferPropsTo(DebugInfo());
+    var debugInfo = DebugInfo({request: this.props.request});
     return (
       <html>
         <head>
           <title>{this.props.data.message}</title>
         </head>
         <body>
-          <h1>Hello, index!</h1>
+          <h1>{this.props.data.message}</h1>
           <a href="/pages/about"><i class="icon icon-pencil"></i> About page</a>
           {debugInfo}
         </body>

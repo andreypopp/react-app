@@ -2,7 +2,7 @@
 
 var BaseXMLHttpRequest  = require('xhr2'),
     inherits            = require('util').inherits,
-    resolve = require('url').resolve;
+    resolve             = require('url').resolve;
 
 function XMLHttpRequest(options, location) {
   BaseXMLHttpRequest.call(this, options);

@@ -28,7 +28,7 @@ following your decisions.
 
 The next option is to bootstrap your application with your own code:
 
-    var ReactApp = require('ra'),
+    var ReactApp = require('react-app'),
         React = require('react-core');
 
     var Page = React.createClass({
@@ -80,7 +80,7 @@ The next option is to bootstrap your application with your own code:
 
 Now you can produce code for your application with the following command:
 
-    % ra bundle ./index.jsx
+    % react-app bundle ./index.jsx
 
 And create a host page:
 
@@ -94,14 +94,14 @@ And create a host page:
 
 Or serve your app directly:
 
-    % ra serve ./index.jsx
+    % react-app serve ./index.jsx
 
 ### Node.js middleware
 
 ReactApp provides with a Node.js middleware which helps you serving your app to
 a browser with pre-rendered UI and bundled assets:
 
-    var serveApp = require('ra/middleware');
+    var serveApp = require('react-app/middleware');
     var app = serveApp(
       './index.jsx', {
         options: {
@@ -113,9 +113,9 @@ a browser with pre-rendered UI and bundled assets:
 
 Alternatively you can use separate middleware for assets and UI pre-rendering.
 
-    var serveAssets = require('ra/middleware/assets'),
-        serveUI = require('ra/middleware/ui'),
-        createBundler = require('ra/bundler'),
+    var serveAssets = require('react-app/middleware/assets'),
+        serveUI = require('react-app/middleware/ui'),
+        createBundler = require('react-app/bundler'),
         express = require('express');
 
     var bundler = createBundler('./index.jsx', {debug: true}),
@@ -129,12 +129,12 @@ Alternatively you can use separate middleware for assets and UI pre-rendering.
 
 ### Command line interface reference
 
-Help is accessible via `ra --help`:
+Help is accessible via `react-app --help`:
 
-    % ra --help
+    % react-app --help
     Usage:
-      ra serve [serve options] app
-      ra bundle [bundle options] app
+      react-app serve [serve options] app
+      react-app bundle [bundle options] app
 
     Common options:
       --help/-h           Show this message and exit

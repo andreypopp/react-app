@@ -6,10 +6,11 @@
  */
 "use strict";
 
-var qs = require('querystring'),
-    React = require('react-tools/build/modules/React'),
-    cloneDeep = require('lodash.clonedeep'),
-    renderPage = require('./bootstrap').renderPage;
+var React = require('react-tools/build/modules/React'),
+    ReactMount = require('react-tools/build/modules/ReactMount'),
+    cloneDeep = require('lodash.clonedeep');
+
+ReactMount.allowFullPageRender = true;
 
 /**
  * Shallow equality test
@@ -45,84 +46,21 @@ var Page = React.createClass({
   },
 
   componentDidMount: function() {
-    window.addEventListener('popstate', this.onPopState);
     window.addEventListener('click', this.onNavigate);
     if (this.props.spec.pageDidMount) this.props.spec.pageDidMount();
   },
 
+  componentDidUpdate: function() {
+    if (this.props.spec.pageDidMount) this.props.spec.pageDidMount();
+  },
+
   componentWillUnmount: function() {
-    window.removeEventListener('popstate', this.onPopState);
     window.removeEventListener('click', this.onNavigate);
     if (this.props.spec.pageWillUnmount) this.props.spec.pageWillUnmount();
   },
 
   componentWillReceiveProps: function(props) {
-    props.spec = bindSpec(props.unboundSpec, this);
-  },
-
-  loadURL: function(path, query) {
-    if (path !== this.props.request.path || !shallowEqual(query, this.props.request.query)) {
-      var match = this.props.router.match(path);
-      if (!match) return;
-
-      var props = {
-        request: {
-          path: path,
-          query: query || {},
-          params: match.params || {}
-        },
-        options: this.props.options,
-        router: this.props.router,
-        unboundSpec: this.props.unboundSpec
-      };
-
-      var page = match.handler(props);
-      if (this.props.spec.pageWillUnmount) this.props.spec.pageWillUnmount();
-      renderPage(page, document, function(err, spec) {
-        if (err) throw err;
-        if (this.props.spec.pageDidMount) this.props.spec.pageDidMount();
-      }.bind(this));
-    }
-  },
-
-  navigate: function(path, query) {
-    var completeURL = path;
-    if (query) {
-      completeURL = completeURL + '?' + qs.stringify(query);
-    }
-    window.history.pushState(null, '', completeURL);
-    this.loadURL(path, query);
-  },
-
-  setQuery: function(query) {
-    var k, newQuery = {}
-    for (k in this.props.request.query)
-      newQuery[k] = this.props.request.query[k];
-    for (k in query)
-      newQuery[k] = query[k];
-    this.navigate(this.props.request.path, newQuery);
-  },
-
-  onPopState: function(e) {
-    e.preventDefault();
-    this.loadURL(
-      window.location.pathname,
-      qs.parse(window.location.search.slice(1)));
-  },
-
-  onNavigate: function(e) {
-    var current = e.target;
-    while (current) {
-      if (current.tagName === 'A') {
-        var href = current.attributes.href && current.attributes.href.value;
-        if (href && !href.match(/^https?:/)) {
-          e.preventDefault();
-          this.navigate(href);
-        }
-        break;
-      }
-      current = current.parentNode;
-    }
+    if (this.props.spec.pageWillUnmount) this.props.spec.pageWillUnmount();
   },
 
   bootstrap: function(cb) {
@@ -154,7 +92,34 @@ function bindSpec(spec, component) {
   return boundSpec;
 }
 
-module.exports = function(spec) {
+function _renderPage(page, doc, cb) {
+  if (doc.readyState === 'interactive' || doc.readyState === 'complete')
+    cb(null, React.renderComponent(page, doc));
+  else
+    window.addEventListener('DOMContentLoaded', function() {
+      cb(null, React.renderComponent(page, doc));
+    });
+}
+
+function renderPage(page, doc, cb) {
+  page.bootstrap(function(err, data) {
+    if (err) return cb(err);
+    _renderPage(page, doc, function(err, page) {
+      cb(err, page, data); 
+    });
+  });
+}
+
+function renderPageToString(page, cb) {
+  page.bootstrap(function(err, data) {
+    if (err) return cb(err);
+    React.renderComponentToString(page, function(markup) {
+      cb(null, markup, data);
+    });
+  });
+}
+
+function createPage(spec) {
   var factory = function(props, children) {
     var page = Page(props, children),
         boundSpec = bindSpec(spec, page);
@@ -165,3 +130,9 @@ module.exports = function(spec) {
   factory.spec = spec;
   return factory;
 }
+
+module.exports = {
+  createPage: createPage,
+  renderPage: renderPage,
+  renderPageToString: renderPageToString
+};

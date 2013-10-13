@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var reactApp  = require('./index'),
+var ReactApp  = require('./index'),
     version   = require('./package.json').version,
     fs        = require('fs'),
     p         = require('path'),
@@ -40,40 +40,19 @@ var reactApp  = require('./index'),
 if (optimist.argv.help) return optimist.showHelp();
 if (optimist.argv.version) return console.log(version);
 
-var argv = optimist.argv,
-    routes = readRoutes(argv),
-    app = createApp(routes, argv);
+var argv = optimist.argv;
 
-app.listen(argv.port || 3000, argv.host || 'localhost');
-
-function createApp(routes, argv) {
-  var app = reactApp(routes, {debug: argv.debug});
-  return app;
-}
-
-function readRoutes(argv) {
-  if (!argv._.length === 0)
-    error('provide routes as argument');
-
-  var arg = argv._[0] || '.';
-
-  if (fs.statSync(arg).isDirectory()) {
-    var files = fs.readdirSync(arg);
-    var routes = {};
-    files
-      .map(function(r) { return {id: r, filename: p.resolve(arg, r)}; })
-      .filter(isPage)
-      .forEach(function(r) {
-        routes['/' + r.id.replace(/\.jsx?/, '')] = r.filename;
-      });
-    return routes;
-  } else {
-    return require(p.resolve(arg));
-  }
-}
-
-function isPage(r) {
-  return fs.statSync(r.filename).isFile() && r.id.match(/\.jsx?/);
+switch (argv._[0]) {
+  case 'serve':
+    var id = argv._[1];
+    if (!id) error('provide module id as an argument');
+    ReactApp(id, argv).listen(argv.port || 3000, argv.host || 'localhost');
+    break;
+  case 'bundle':
+    error('not implemented');
+    break;
+  default:
+    error('unknown command ' + argv._[0]);
 }
 
 function error(msg) {

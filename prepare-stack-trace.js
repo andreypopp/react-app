@@ -13,8 +13,10 @@ function prepareStackTrace(error, stack) {
           column: frame.getColumnNumber()
         };
 
-    if (position.source === undefined)
-      position = __react_app_sourceMap.map.originalPositionFor(position);
+    if (position.source === undefined || position.source === 'undefined') {
+      if (__react_app_sourceMap)
+        position = __react_app_sourceMap.map.originalPositionFor(position);
+    }
 
     return '    at ' + name + ' (' + position.source + ':' + position.line + ':0)';
 

@@ -7,15 +7,21 @@
 require('./styles.css');
 
 var React = require('react-tools/build/modules/React'),
-    createPage = require('../../page'),
+    createPage = require('../../page').createPage,
     DebugInfo = require('./debug_info.jsx');
 
 module.exports = createPage({
   onClick: function() {
     console.log('x');
   },
+  pageDidMount: function() {
+    console.log('mount', 'about');
+  },
+  pageWillUnmount: function() {
+    console.log('unmount', 'about');
+  },
   render: function() {
-    var debugInfo = this.transferPropsTo(DebugInfo());
+    var debugInfo = DebugInfo({request: this.props.request});
     return (
       <html>
         <head>
