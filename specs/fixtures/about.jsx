@@ -8,6 +8,7 @@ require('./styles.css');
 
 var React = require('react-tools/build/modules/React'),
     createPage = require('../../page'),
+    Boilerplate = require('./boilerplate.jsx'),
     DebugInfo = require('./debug_info.jsx');
 
 module.exports = createPage({
@@ -17,16 +18,13 @@ module.exports = createPage({
   render: function() {
     var debugInfo = this.transferPropsTo(DebugInfo());
     return (
-      <html>
-        <head>
-          <title>About</title>
-        </head>
-        <body onClick={this.onClick}>
+      <Boilerplate title="Index">
+        <div onClick={this.onClick}>
           <h1>Hello, about!</h1>
           <a href="/">index</a>
           {debugInfo}
-        </body>
-      </html>
+        </div>
+      </Boilerplate>
     );
   }
 });
