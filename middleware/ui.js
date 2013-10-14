@@ -162,6 +162,14 @@ function scriptBuilder(bundler) {
   return builder;
 }
 
+function _cssBundleElement(assetsUrl) {
+  return '<link rel="stylesheet" href="' + assetsUrl + '/bundle.css">';
+}
+
+function _jsBundleElement(assetsUrl) {
+  return '<script async onload="__bootstrap();" src="' + assetsUrl + '/bundle.js"></script>';
+}
+
 module.exports = function(id, opts) {
   var bundler = opts.bundler || createBundler(id, opts),
       builder = scriptBuilder(bundler);
@@ -180,9 +188,9 @@ module.exports = function(id, opts) {
             data = rendered.data;
 
         rendered = _insertIntoHead(markup,
+          _cssBundleElement(opts.assetsUrl) +
           _genClientBootstrapCode(id, data) +
-          '<link rel="stylesheet" href="' + opts.assetsUrl + '/bundle.css">' +
-          '<script async onload="__bootstrap();" src="' + opts.assetsUrl + '/bundle.js"></script>')
+          _jsBundleElement(opts.assetsUrl));
         return res.send(rendered);
       }).fail(next);
   };

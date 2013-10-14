@@ -1,5 +1,7 @@
 var path          = require('path'),
     EventEmitter  = require('events').EventEmitter,
+    q             = require('kew'),
+    callsite      = require('callsite'),
     utils         = require('lodash'),
     aggregate     = require('stream-aggregate-promise'),
     dcompose      = require('dcompose'),
@@ -36,10 +38,15 @@ function Bundler(id, opts) {
 utils.assign(Bundler.prototype, EventEmitter.prototype, {
   build: function() {
     this.emit('update');
-    this.bundle = this.composer.bundle().then(aggregateStreams);
+    this.bundle = q.all([this.composer.js(), this.composer.css()])
+      .then(function(bundles) { return bundles.map(aggregate) })
+      .then(function(bundles) {
+        return {'bundle.js': bundles[0], 'bundle.css': bundles[1]}
+      });
   }
 });
 
 module.exports = function(id, opts) {
+  opts.root = opts.root || path.dirname(callsite()[1].getFileName());
   return new Bundler(id, opts);
 }
