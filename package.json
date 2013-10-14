@@ -18,18 +18,17 @@
     "xhr2": "*",
     "express": "3.x.x",
     "url-pattern": "~0.2.1",
-    "contextify": "~0.1.6",
     "kew": "~0.1.7",
     "callsite": "~1.0.0",
     "reactify": "git+https://github.com/andreypopp/reactify#master",
-    "dcompose": "~0.4.0",
-    "dcompose-middleware": "~0.1.0",
+    "dcompose": "~0.5.x",
     "stream-aggregate-promise": "0.x.x",
     "lodash": "2.x.x",
     "lodash.clonedeep": "~2.1.0",
     "optimist": "~0.6.0",
     "wordwrap": "0.0.2",
-    "source-map": "~0.1.30"
+    "source-map": "~0.1.30",
+    "mimetype": "0.0.5"
   },
   "devDependencies": {
     "react-tools": "http://data.andreypopp.com/react-tools-0.5.0-alpha.tgz",

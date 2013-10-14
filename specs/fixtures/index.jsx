@@ -7,8 +7,8 @@
 require('./styles.css');
 
 var React = require('react-tools/build/modules/React'),
-    createPage = require('../../page'),
     Boilerplate = require('./boilerplate.jsx'),
+    createPage = require('../../page').createPage,
     DebugInfo = require('./debug_info.jsx');
 
 module.exports = createPage({
@@ -16,13 +16,13 @@ module.exports = createPage({
     console.log('y');
   },
   pageDidMount: function() {
-    console.log('mount');
+    console.log('mount', 'index');
   },
   pageWillUnmount: function() {
-    console.log('unmount');
+    console.log('unmount', 'index');
   },
   render: function() {
-    var debugInfo = this.transferPropsTo(DebugInfo());
+    var debugInfo = DebugInfo({request: this.props.request});
     return (
       <Boilerplate title="Index">
         <div onClick={this.onClick}>

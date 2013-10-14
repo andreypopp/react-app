@@ -1,22 +1,16 @@
 "use strict";
 
-var getReactRootElementInContainer = require(
-      'react-tools/build/modules/getReactRootElementInContainer'),
-    ReactMount = require('react-tools/build/modules/ReactMount'),
-    bootstrap = require('./bootstrap'),
-    createPage = require('./page'),
-    createRouter = require('./router');
+var getID = require('react-tools/build/modules/getReactRootElementInContainer'),
+    ReactMount = require('react-tools/build/modules/ReactMount');
 
-function currentPage() {
-  var id = getReactRootElementInContainer(document);
+function currentApp(doc) {
+  var id = getID(doc || document);
   id = id && ReactMount.getID(id);
-  return ReactMount._instancesByReactRootID[id];
+  return ReactMount._instanceByReactRootID[id].props.app;
 }
 
 module.exports = {
-  createPage: createPage,
-  createRouter: createRouter,
-  renderPage: bootstrap.renderPage,
-  renderPageToString: bootstrap.renderPageToString,
-  currentPage: currentPage
+  currentApp: currentApp,
+  createApp: require('./app'),
+  createPage: require('./page').createPage
 };

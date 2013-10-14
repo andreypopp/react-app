@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
-var reactApp  = require('./index'),
-    version   = require('./package.json').version,
-    fs        = require('fs'),
-    p         = require('path'),
-    wrap      = require('wordwrap')(79),
-    optimist  = require('optimist')
-      .usage('$0 [options]')
+var ReactApp      = require('./index'),
+    createBundler = require('./bundler'),
+    version       = require('./package.json').version,
+    fs            = require('fs'),
+    p             = require('path'),
+    wrap          = require('wordwrap')(79),
+    optimist      = require('optimist')
+      .usage('$0 [options] (bundle|serve)')
       .option('h', {
         alias: 'help',
         boolean: true,
@@ -24,56 +25,48 @@ var reactApp  = require('./index'),
       })
       .option('p', {
         alias: 'port',
-        describe: 'Port to use (default: 3000)'
+        default: 3000,
+        describe: 'Port to use'
       })
       .option('host', {
-        describe: 'Host to use (default: localhost)'
+        default: 'localhost',
+        describe: 'Host to use'
       })
       .option('t', {
         alias: 'transform',
-        describe: 'Apply dcompose transform'
+        describe: 'Apply source transform'
       })
-      .option('routes', {
-        describe: 'Use routes definition'
+      .option('o', {
+        alias: 'output',
+        describe: 'Output directory for bundle'
       })
 
 if (optimist.argv.help) return optimist.showHelp();
 if (optimist.argv.version) return console.log(version);
 
 var argv = optimist.argv,
-    routes = readRoutes(argv),
-    app = createApp(routes, argv);
+    id = argv._[1];
 
-app.listen(argv.port || 3000, argv.host || 'localhost');
+argv.root = process.cwd();
 
-function createApp(routes, argv) {
-  var app = reactApp(routes, {debug: argv.debug});
-  return app;
-}
-
-function readRoutes(argv) {
-  if (!argv._.length === 0)
-    error('provide routes as argument');
-
-  var arg = argv._[0] || '.';
-
-  if (fs.statSync(arg).isDirectory()) {
-    var files = fs.readdirSync(arg);
-    var routes = {};
-    files
-      .map(function(r) { return {id: r, filename: p.resolve(arg, r)}; })
-      .filter(isPage)
-      .forEach(function(r) {
-        routes['/' + r.id.replace(/\.jsx?/, '')] = r.filename;
-      });
-    return routes;
-  } else {
-    return require(p.resolve(arg));
-  }
-}
-
-function isPage(r) {
-  return fs.statSync(r.filename).isFile() && r.id.match(/\.jsx?/);
+switch (argv._[0]) {
+  case 'serve':
+    if (!id) error('provide module id as an argument');
+    ReactApp(id, argv).listen(argv.port, argv.host);
+    break;
+  case 'bundle':
+    var output = argv.output || argv.o || '.';
+    var bundler = createBundler(id, argv).bundle.then(function(streams) {
+      for (var name in streams)
+        (function(name) {
+          streams[name].then(function(bundle) {
+            fs.writeFileSync(p.join(output, name), bundle);
+          }).end();
+        })(name);
+    }).end();
+    break;
+  default:
+    error('unknown command ' + argv._[0]);
 }
 
 function error(msg) {

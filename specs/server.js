@@ -1,21 +1,9 @@
 var ok      = require('assert').ok,
     express = require('express'),
     request = require('supertest'),
-    makeApp = require('../index');
+    app     = require('./fixtures/server');
 
 describe('server rendering', function() {
-
-  var app = express();
-
-  app.get('/api/data', function(req, res) {
-    res.send({message: 'Hey there!'});
-  });
-  
-  app.use(makeApp({
-    '/':                './fixtures/index.jsx',
-    '/pages/about':     './fixtures/about.jsx',
-    '/pages/withdata':  './fixtures/withdata.jsx'
-  }, {debug: true}));
 
   it('renders page with data', function(done) {
     request(app)
