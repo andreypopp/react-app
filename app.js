@@ -4,17 +4,18 @@ var qs                    = require('querystring'),
     renderPageToString    = page.renderPageToString,
     renderPage            = page.renderPage;
 
+/**
+ * Create an application object from spec
+ */
 module.exports = function(spec) {
   return new Application(spec);
 }
 
-function NotFoundError(url) {
-  Error.call(this, 'not found: ' + url);
-  this.url = url;
-  this.isNotFound = true;
-}
-NotFoundError.prototype = new Error();
-
+/**
+ * Application
+ *
+ * @param {Object} spec
+ */
 function Application(spec) {
   this.spec = spec;
   this.routes = this.spec.routes;
@@ -25,6 +26,12 @@ function Application(spec) {
 
 Application.prototype = {
 
+  /**
+   * Start application
+   *
+   * @param {Object} data - bootstrap data which will be passed to the first
+   * matched page
+   */
   start: function(data) {
     window.addEventListener('popstate', skipFirst(this.onPopState.bind(this)));
     window.addEventListener('click', this.onNavigate.bind(this));
@@ -35,14 +42,26 @@ Application.prototype = {
     });
   },
 
+  /**
+   * Navigate
+   *
+   * @param {String|Request} request
+   */
   navigate: function(request) {
+    if (!request.path)
+      request = parseURL(request);
     var url = request.path;
     if (request.query)
-      url = url + '?' + qs.stringify(query);
+      url = url + '?' + qs.stringify(request.query);
     window.history.pushState(null, '', url);
     this.process(request);
   },
 
+  /**
+   * Set values in querystring
+   *
+   * @param {Object} query
+   */
   setQuery: function(query) {
     var k, newQuery = {}
     for (k in this.request.query)
@@ -51,6 +70,21 @@ Application.prototype = {
       newQuery[k] = query[k];
     var request = {path: this.request.path, query: newQuery};
     this.navigate(request);
+  },
+
+  /**
+   * Generate markup for a page for a specified request
+   *
+   * @param {String|Request} request
+   * @param {Callback} cb
+   */
+  generateMarkup: function(request, cb) {
+    if (!request.path)
+      request = parseURL(request);
+    var page = this.makePage(request);
+    if (!page)
+      return cb(new NotFoundError(request.path));
+    renderPageToString(page, cb);
   },
 
   process: function(request, cb) {
@@ -65,13 +99,6 @@ Application.prototype = {
       this.page = page;
       cb(null, this);
     }.bind(this));
-  },
-
-  processAndGenerateMarkup: function(request, cb) {
-    var page = this.makePage(request);
-    if (!page)
-      return cb(new NotFoundError(request.path));
-    renderPageToString(page, cb);
   },
 
   makePage: function(request) {
@@ -107,8 +134,7 @@ Application.prototype = {
         var href = current.attributes.href && current.attributes.href.value;
         if (href && !href.match(/^https?:/)) {
           e.preventDefault();
-          // TODO: process querystring
-          this.navigate({path: href});
+          this.navigate(href);
         }
         break;
       }
@@ -117,6 +143,11 @@ Application.prototype = {
   }
 };
 
+/**
+ * Skip first invokation for a specified func
+ *
+ * @param {Function} func
+ */
 function skipFirst(func) {
   var n = 0;
   return function() {
@@ -124,3 +155,29 @@ function skipFirst(func) {
     n = n + 1;
   }
 }
+
+/**
+ * Parse URL into request object
+ *
+ * @param {String} url
+ */
+function parseURL(url) {
+  if (url.indexOf('?') > -1) {
+    var parts = url.split('?');
+    return {path: parts[0], query: qs.parse(parts[1])};
+  } else {
+    return {path: url};
+  }
+}
+
+/**
+ * Error which will be thrown in case of no match found for a processed request.
+ *
+ * @param {String} url
+ */
+function NotFoundError(url) {
+  Error.call(this, 'not found: ' + url);
+  this.url = url;
+  this.isNotFound = true;
+}
+NotFoundError.prototype = new Error();

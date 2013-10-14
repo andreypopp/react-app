@@ -21,7 +21,7 @@ function _genServerRenderingCode(id, request) {
     "var ReactApp = require('react-app');",
     "var request = " + JSON.stringify(request) + ";",
     "var app = require(" + JSON.stringify(id) + ");",
-    "app.processAndGenerateMarkup(request, function(err, markup, data) {",
+    "app.generateMarkup(request, function(err, markup, data) {",
     "  if (err) return __react_app_callback(err);",
     "  __react_app_callback(null, {markup: markup, data: data});",
     "});",
