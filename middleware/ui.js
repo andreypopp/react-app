@@ -75,38 +75,38 @@ function retrieveSourceMap(source) {
  */
 function generateMarkup(id, bundle, request, location, opts) {
   var dom = domain.create(),
-      promise = q.defer(),
-      XMLHttpRequest = makeXMLHttpRequest(location),
-      sandbox = {
-        __react_app_callback: promise.makeNodeResolver(),
-        console: console,
-        XMLHttpRequest: XMLHttpRequest,
-        location: location,
-        setTimeout: setTimeout,
-        clearTimeout: clearTimeout,
-        setInterval: setInterval,
-        clearInterval: clearInterval
-      };
-
-  if (opts.debug)
-    sandbox.__react_app_sourceMap = bundle.sourceMap;
-
-  sandbox.self = sandbox;
-  sandbox.window = sandbox;
-  sandbox.global = sandbox;
+      promise = q.defer();
 
   dom.on('error', promise.reject.bind(promise));
   dom.run(function() {
+    var sandbox = {
+      __react_app_callback: promise.makeNodeResolver(),
+      console: console,
+      XMLHttpRequest: makeXMLHttpRequest(location),
+      location: location,
+      setTimeout: setTimeout,
+      clearTimeout: clearTimeout,
+      setInterval: setInterval,
+      clearInterval: clearInterval
+    };
+
+    if (opts.debug)
+      sandbox.__react_app_sourceMap = bundle.sourceMap;
+
+    sandbox.self = sandbox;
+    sandbox.window = sandbox;
+    sandbox.global = sandbox;
+
     var ctx = contextify.createContext(sandbox);
     if (opts.debug)
       PATCH_STACK_TRACE.runInContext(ctx);
     bundle.script.runInContext(ctx);
     contextify.createScript(_genServerRenderingCode(id, request)).runInContext(ctx);
     promise.fin(function() {
-    //for (var k in sandbox)
-    //  delete sandbox[k];
-    //sandbox = null;
-    //ctx = null;
+      for (var k in sandbox)
+        delete sandbox[k];
+      sandbox = null;
+      ctx = null;
     });
   });
 
