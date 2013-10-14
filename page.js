@@ -109,6 +109,13 @@ function _renderPage(page, doc, cb) {
     });
 }
 
+/**
+ * Render page into a document element.
+ *
+ * @param {Page} page
+ * @param {DocumentElement} doc
+ * @param {Callback} cb
+ */
 function renderPage(page, doc, cb) {
   page.bootstrap(function(err, data) {
     if (err) return cb(err);
@@ -118,6 +125,12 @@ function renderPage(page, doc, cb) {
   });
 }
 
+/**
+ * Render page to a string
+ *
+ * @param {Page} page
+ * @param {Callback} cb
+ */
 function renderPageToString(page, cb) {
   page.bootstrap(function(err, data) {
     if (err) return cb(err);
@@ -127,6 +140,11 @@ function renderPageToString(page, cb) {
   });
 }
 
+/**
+ * Create a page from a spec
+ *
+ * @param {PageSpecification} spec
+ */
 function createPage(spec) {
   if (typeof spec === 'function')
     spec = functionToSpec(spec);
