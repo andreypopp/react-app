@@ -1,8 +1,13 @@
+"use strict";
+
 var qs                    = require('querystring'),
+    ReactMount            = require('react-tools/build/modules/ReactMount'),
     createRouter          = require('./router'),
     page                  = require('./page'),
     renderPageToString    = page.renderPageToString,
     renderPage            = page.renderPage;
+
+ReactMount.allowFullPageRender = true;
 
 /**
  * Create an application object from spec

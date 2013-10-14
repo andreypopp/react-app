@@ -1,9 +1,11 @@
+"use strict";
+
 var React = require('react-tools/build/modules/React'),
     head = React.DOM.head;
 
 React.DOM.head = React.createClass({
   render: function() {
-    children = [].concat(__styles, __scripts, this.props.children);
+    var children = [].concat(__styles, __scripts, this.props.children);
     return head({}, children);
   }
 });

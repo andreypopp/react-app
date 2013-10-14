@@ -1,3 +1,5 @@
+"use strict";
+
 var utils           = require('lodash'),
     path            = require('path'),
     callsite        = require('callsite'),

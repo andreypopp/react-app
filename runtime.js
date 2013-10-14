@@ -1,3 +1,5 @@
+"use strict";
+
 var AssetInjector = require('./asset-injector'),
     app = require('' + 'app');
 

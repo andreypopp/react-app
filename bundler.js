@@ -9,13 +9,6 @@ var path          = require('path'),
     dcompose      = require('dcompose'),
     reactify      = require('reactify');
 
-function aggregateStreams(streams) {
-  var result = {};
-  for (var k in streams)
-    result[k] = aggregate(streams[k]);
-  return result;
-}
-
 function createComposer(id, opts) {
   var entry = {
     id: path.resolve(opts.root, id),

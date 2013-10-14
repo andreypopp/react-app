@@ -7,38 +7,7 @@
 "use strict";
 
 var React = require('react-tools/build/modules/React'),
-    ReactMount = require('react-tools/build/modules/ReactMount'),
     cloneDeep = require('lodash.clonedeep');
-
-ReactMount.allowFullPageRender = true;
-
-/**
- * Shallow equality test
- *
- * Shamelessly stolen from React codebase
- *
- * Copyright 2013 Facebook, Inc.
- */
-function shallowEqual(objA, objB) {
-  if (objA === objB) {
-    return true;
-  }
-  var key;
-  // Test for A's keys different from B.
-  for (key in objA) {
-    if (objA.hasOwnProperty(key) &&
-        (!objB.hasOwnProperty(key) || objA[key] !== objB[key])) {
-      return false;
-    }
-  }
-  // Test for B'a keys missing from A.
-  for (key in objB) {
-    if (objB.hasOwnProperty(key) && !objA.hasOwnProperty(key)) {
-      return false;
-    }
-  }
-  return true;
-}
 
 var Page = React.createClass({
   render: function() {
