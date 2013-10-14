@@ -12,8 +12,8 @@ describe('server rendering', function() {
       .end(function(err, res) {
         ok(!err);
         ok(res.text.indexOf('</html>') > -1);
-        ok(res.text.indexOf('/assets/bundle.js') > -1);
-        ok(res.text.indexOf('/assets/bundle.css') > -1);
+        ok(res.text.indexOf('bundle.js') > -1);
+        ok(res.text.indexOf('bundle.css') > -1);
         ok(res.text.indexOf('Hey there!') > -1);
         done()
       });
@@ -26,8 +26,8 @@ describe('server rendering', function() {
       .end(function(err, res) {
         ok(!err);
         ok(res.text.indexOf('</html>') > -1);
-        ok(res.text.indexOf('/assets/bundle.js') > -1);
-        ok(res.text.indexOf('/assets/bundle.css') > -1);
+        ok(res.text.indexOf('bundle.js') > -1);
+        ok(res.text.indexOf('bundle.css') > -1);
         ok(res.text.indexOf('Hello, index!') > -1);
         done()
       });
@@ -40,8 +40,8 @@ describe('server rendering', function() {
       .end(function(err, res) {
         ok(!err);
         ok(res.text.indexOf('</h1>') > -1);
-        ok(res.text.indexOf('/assets/bundle.js') > -1);
-        ok(res.text.indexOf('/assets/bundle.css') > -1);
+        ok(res.text.indexOf('bundle.js') > -1);
+        ok(res.text.indexOf('bundle.css') > -1);
         ok(res.text.indexOf('Hello, about!') > -1);
         done()
       });

@@ -2,6 +2,7 @@
 
 var path                = require('path'),
     domain              = require('domain'),
+    utils               = require('lodash'),
     vm                  = require('vm'),
     fs                  = require('fs'),
     url                 = require('url'),
@@ -9,37 +10,6 @@ var path                = require('path'),
     SourceMapConsumer   = require('source-map').SourceMapConsumer,
     makeXMLHttpRequest  = require('../xmlhttprequest'),
     createBundler       = require('../bundler');
-
-var PATCH_STACK_TRACE = vm.createScript(fs.readFileSync(
-  path.join(__dirname, '../prepare-stack-trace.js'),
-  'utf8'))
-
-function _genServerRenderingCode(id, request) {
-  return [
-    "var ExecutionEnvironment = require('react-tools/build/modules/ExecutionEnvironment');",
-    "ExecutionEnvironment.canUseDOM = false;",
-    "var ReactApp = require('react-app');",
-    "var request = " + JSON.stringify(request) + ";",
-    "var app = require(" + JSON.stringify(id) + ");",
-    "app.generateMarkup(request, function(err, markup, data) {",
-    "  if (err) return __react_app_callback(err);",
-    "  __react_app_callback(null, {markup: markup, data: data});",
-    "});",
-  ].join('\n');
-}
-
-function _genClientBootstrapCode(id, data) {
-  return [
-    "<script>",
-    "  global = self;",
-    "  var __bootstrap = function() {",
-    "    var app = require(" + JSON.stringify(id) + ");",
-    "    var data = " + JSON.stringify(data) + ";",
-    "    app.start(data);",
-    "  };",
-    "</script>"
-  ].join('\n');
-}
 
 function retrieveSourceMap(source) {
   // Get the URL of the source map
@@ -72,7 +42,7 @@ function retrieveSourceMap(source) {
  * @param {Object} location
  * @returns {String} Rendered React component
  */
-function generateMarkup(id, bundle, request, location, opts) {
+function generateMarkup(bundle, request, location, opts) {
   var dom = domain.create(),
       promise = q.defer();
 
@@ -80,7 +50,7 @@ function generateMarkup(id, bundle, request, location, opts) {
   dom.run(function() {
     var sandbox = {
       __react_app_callback: promise.makeNodeResolver(),
-      __react_app_sourceMap: null,
+      __react_app_source_map: null,
       console: console,
       XMLHttpRequest: makeXMLHttpRequest(location),
       location: location,
@@ -91,17 +61,17 @@ function generateMarkup(id, bundle, request, location, opts) {
     };
 
     if (opts.debug)
-      sandbox.__react_app_sourceMap = bundle.sourceMap;
+      sandbox.__react_app_source_map = bundle.sourceMap;
 
     sandbox.self = sandbox;
     sandbox.window = sandbox;
     sandbox.global = sandbox;
 
     var ctx = vm.createContext(sandbox);
-    if (opts.debug)
-      PATCH_STACK_TRACE.runInContext(ctx);
+    if (opts.debug) patchStackTraceScript.runInContext(ctx);
     bundle.script.runInContext(ctx);
-    vm.createScript(_genServerRenderingCode(id, request)).runInContext(ctx);
+    injectAssetsOnServer(opts.injectAssets).runInContext(ctx);
+    generateMarkupOnServer(request).runInContext(ctx);
     promise.fin(function() {
       for (var k in sandbox)
         delete sandbox[k];
@@ -115,22 +85,6 @@ function generateMarkup(id, bundle, request, location, opts) {
       if (err.isNotFound) return null
       else throw err;
     });
-}
-
-/**
- * Insert <script> tag into markup.
- *
- * @param {String} markup Markup to insert script tag into
- * @param {String} tag Script tag to insert
- * @returns {String} Markup with inserted script tags
- */
-function _insertIntoHead(markup, tag) {
-  var index = markup.indexOf('</head>');
-  if (index > -1) {
-    return markup.slice(0, index) + tag + markup.slice(index);
-  } else {
-    return markup + tag;
-  }
 }
 
 function makeLocation(req, origin) {
@@ -161,13 +115,46 @@ function scriptBuilder(bundler) {
   return builder;
 }
 
-function _cssBundleElement(assetsUrl) {
-  return '<link rel="stylesheet" href="' + assetsUrl + '/bundle.css">';
+function compileToBrowser(func) {
+  var code = func.toString();
+  return function() {
+    var args = utils.toArray(arguments);
+    return "<script>(" + code + ").apply(this, " + JSON.stringify(args) + ")</script>";
+  }
 }
 
-function _jsBundleElement(assetsUrl) {
-  return '<script async onload="__bootstrap();" src="' + assetsUrl + '/bundle.js"></script>';
+function compileToVM(func) {
+  var code = func.toString();
+  return function() {
+    var args = utils.toArray(arguments);
+    return vm.createScript("(" + code + ").apply(this, " + JSON.stringify(args) + ")");
+  }
 }
+
+var patchStackTraceScript = vm.createScript(fs.readFileSync(
+  path.join(__dirname, '../prepare-stack-trace.js'),
+  'utf8'))
+
+var generateMarkupOnServer = compileToVM(function(request, cb) {
+  var runtime = require('react-app/server-runtime');
+  runtime.generateMarkup(request, __react_app_callback);
+});
+
+var injectAssetsOnServer = compileToVM(function(assets) {
+  var runtime = require('react-app/server-runtime');
+  if (assets) runtime.injectAssets(assets);
+});
+
+var injectAssetsOnClient = compileToBrowser(function(assets) {
+  global = self;
+  var runtime = require('react-app/runtime');
+  runtime.injectAssets(assets);
+});
+
+var startAppOnClient = compileToBrowser(function(data) {
+  var runtime = require('react-app/runtime');
+  runtime.app.start(data);
+});
 
 module.exports = function(id, opts) {
   var bundler = opts.bundler || createBundler(id, opts),
@@ -179,18 +166,14 @@ module.exports = function(id, opts) {
 
     builder.script
       .then(function(script) {
-        return generateMarkup(id, script, request, loc, opts);
+        return generateMarkup(script, request, loc, opts);
       })
       .then(function(rendered) {
         if (rendered === null) return next();
-        var markup = rendered.markup,
-            data = rendered.data;
-
-        rendered = _insertIntoHead(markup,
-          _cssBundleElement(opts.assetsUrl) +
-          _genClientBootstrapCode(id, data) +
-          _jsBundleElement(opts.assetsUrl));
-        return res.send(rendered);
+        res.write(rendered.markup);
+        res.write(injectAssetsOnClient(opts.injectAssets));
+        res.write(startAppOnClient(rendered.data));
+        res.end();
       }).fail(next);
   };
 }

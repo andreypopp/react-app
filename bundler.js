@@ -1,3 +1,5 @@
+"use strict";
+
 var path          = require('path'),
     EventEmitter  = require('events').EventEmitter,
     q             = require('kew'),
@@ -15,17 +17,26 @@ function aggregateStreams(streams) {
 }
 
 function createComposer(id, opts) {
-  return dcompose(
-    [
-      {id: path.resolve(opts.root, id), expose: id, entry: false},
-      {id: 'react-tools/build/modules/React', expose: true, entry: false},
-      {id: 'react-tools/build/modules/ExecutionEnvironment', expose: true, entry: false},
-      {id: require.resolve('./browser'), expose: 'react-app', entry: false}
-    ],
-    {
-      transform: [].concat(opts.transform, reactify),
-      debug: opts.debug
-    });
+  var entry = {
+    id: path.resolve(opts.root, id),
+    expose: id,
+    entry: false
+  };
+  var serverRuntime = {
+    id: require.resolve('./server-runtime'),
+    expose: 'react-app/server-runtime',
+    entry: false
+  };
+  var runtime = {
+    id: require.resolve('./runtime'),
+    expose: 'react-app/runtime',
+    entry: false,
+    deps: {app: entry.id}
+  };
+  return dcompose([entry, runtime, serverRuntime], {
+    transform: [].concat(opts.transform, reactify),
+    debug: opts.debug
+  });
 }
 
 function Bundler(id, opts) {

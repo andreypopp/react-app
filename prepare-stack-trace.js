@@ -14,8 +14,8 @@ function prepareStackTrace(error, stack) {
         };
 
     if (position.source === undefined || position.source === 'undefined') {
-      if (__react_app_sourceMap)
-        position = __react_app_sourceMap.map.originalPositionFor(position);
+      if (__react_app_source_map)
+        position = __react_app_source_map.map.originalPositionFor(position);
     }
 
     return '    at ' + name + ' (' + position.source + ':' + position.line + ':0)';

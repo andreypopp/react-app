@@ -8,6 +8,7 @@
 require('./styles.css');
 
 var React = require('react-tools/build/modules/React'),
+    Boilerplate = require('./boilerplate.jsx'),
     createPage = require('../../page').createPage,
     DebugInfo = require('./debug_info.jsx');
 
@@ -34,16 +35,11 @@ module.exports = createPage({
   render: function() {
     var debugInfo = DebugInfo({request: this.props.request});
     return (
-      <html>
-        <head>
-          <title>{this.props.data.message}</title>
-        </head>
-        <body>
-          <h1>{this.props.data.message}</h1>
-          <a href="/pages/about"><i class="icon icon-pencil"></i> About page</a>
-          {debugInfo}
-        </body>
-      </html>
+      <Boilerplate title="With Data!">
+        <h1>{this.props.data.message}</h1>
+        <a href="/pages/about"><i class="icon icon-pencil"></i> About page</a>
+        {debugInfo}
+      </Boilerplate>
     );
   },
 

@@ -16,6 +16,10 @@ module.exports = function(id, opts) {
     pageOptions: undefined,
   }, opts);
 
+  opts.injectAssets = {
+    stylesheets: [opts.assetsUrl + '/bundle.css'],
+    scripts: [opts.assetsUrl + '/bundle.js']
+  };
   opts.bundler = createBundler(id, opts);
 
   var app = express();
