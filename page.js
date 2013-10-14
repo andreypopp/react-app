@@ -92,6 +92,14 @@ function bindSpec(spec, component) {
   return boundSpec;
 }
 
+function functionToSpec(func) {
+  return {
+    render: function() {
+      return func.call(this, this.props);
+    }
+  };
+}
+
 function _renderPage(page, doc, cb) {
   if (doc.readyState === 'interactive' || doc.readyState === 'complete')
     cb(null, React.renderComponent(page, doc));
@@ -120,15 +128,15 @@ function renderPageToString(page, cb) {
 }
 
 function createPage(spec) {
-  var factory = function(props, children) {
+  if (typeof spec === 'function')
+    spec = functionToSpec(spec);
+  return function(props, children) {
     var page = Page(props, children),
         boundSpec = bindSpec(spec, page);
     props.unboundSpec = spec;
     props.spec = boundSpec;
     return page;
   }
-  factory.spec = spec;
-  return factory;
 }
 
 module.exports = {
