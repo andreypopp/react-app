@@ -2,7 +2,7 @@
 
 var path                = require('path'),
     domain              = require('domain'),
-    contextify          = require('contextify'),
+    vm                  = require('vm'),
     fs                  = require('fs'),
     url                 = require('url'),
     q                   = require('kew'),
@@ -10,7 +10,7 @@ var path                = require('path'),
     makeXMLHttpRequest  = require('../xmlhttprequest'),
     createBundler       = require('../bundler');
 
-var PATCH_STACK_TRACE = contextify.createScript(fs.readFileSync(
+var PATCH_STACK_TRACE = vm.createScript(fs.readFileSync(
   path.join(__dirname, '../prepare-stack-trace.js'),
   'utf8'))
 
@@ -98,11 +98,11 @@ function generateMarkup(id, bundle, request, location, opts) {
     sandbox.window = sandbox;
     sandbox.global = sandbox;
 
-    var ctx = contextify.createContext(sandbox);
+    var ctx = vm.createContext(sandbox);
     if (opts.debug)
       PATCH_STACK_TRACE.runInContext(ctx);
     bundle.script.runInContext(ctx);
-    contextify.createScript(_genServerRenderingCode(id, request)).runInContext(ctx);
+    vm.createScript(_genServerRenderingCode(id, request)).runInContext(ctx);
     promise.fin(function() {
       for (var k in sandbox)
         delete sandbox[k];
@@ -149,7 +149,7 @@ function scriptBuilder(bundler) {
         .then(function(bundle) {return bundle['bundle.js']})
         .then(function(bundle) {
           return {
-            script: contextify.createScript(bundle),
+            script: vm.createScript(bundle),
             sourceMap: retrieveSourceMap(bundle)
           }
         });
