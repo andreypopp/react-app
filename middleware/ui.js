@@ -55,9 +55,8 @@ function retrieveSourceMap(source) {
     sourceMapData = new Buffer(sourceMappingURL.slice(dataUrlPrefix.length), "base64").toString();
   }
 
-  if (!sourceMapData) {
+  if (!sourceMapData)
     return null;
-  }
 
   return {
     url: sourceMappingURL,
