@@ -81,6 +81,7 @@ function generateMarkup(id, bundle, request, location, opts) {
   dom.run(function() {
     var sandbox = {
       __react_app_callback: promise.makeNodeResolver(),
+      __react_app_sourceMap: null,
       console: console,
       XMLHttpRequest: makeXMLHttpRequest(location),
       location: location,
