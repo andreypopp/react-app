@@ -1,6 +1,6 @@
 "use strict";
 
-var AssetInjector = require('./asset-injector'),
+var AssetInjector = require('../asset-injector'),
     app = require('' + 'app');
 
 module.exports = {

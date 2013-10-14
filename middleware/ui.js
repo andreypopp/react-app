@@ -136,23 +136,23 @@ var patchStackTraceScript = vm.createScript(fs.readFileSync(
   'utf8'))
 
 var generateMarkupOnServer = compileToVM(function(request, cb) {
-  var runtime = require('react-app/server-runtime');
+  var runtime = require('react-app/runtime/server');
   runtime.generateMarkup(request, __react_app_callback);
 });
 
 var injectAssetsOnServer = compileToVM(function(assets) {
-  var runtime = require('react-app/server-runtime');
+  var runtime = require('react-app/runtime/server');
   if (assets) runtime.injectAssets(assets);
 });
 
 var injectAssetsOnClient = compileToBrowser(function(assets) {
   global = self;
-  var runtime = require('react-app/runtime');
+  var runtime = require('react-app/runtime/browser');
   runtime.injectAssets(assets);
 });
 
 var startAppOnClient = compileToBrowser(function(data) {
-  var runtime = require('react-app/runtime');
+  var runtime = require('react-app/runtime/browser');
   runtime.app.start(data);
 });
 

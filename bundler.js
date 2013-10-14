@@ -16,13 +16,13 @@ function createComposer(id, opts) {
     entry: false
   };
   var serverRuntime = {
-    id: require.resolve('./server-runtime'),
-    expose: 'react-app/server-runtime',
+    id: require.resolve('./runtime/server'),
+    expose: 'react-app/runtime/server',
     entry: false
   };
   var runtime = {
-    id: require.resolve('./runtime'),
-    expose: 'react-app/runtime',
+    id: require.resolve('./runtime/browser'),
+    expose: 'react-app/runtime/browser',
     entry: false,
     deps: {app: entry.id}
   };
