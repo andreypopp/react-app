@@ -42,10 +42,19 @@ var Boilerplate = React.createClass({
 });
 
 var MainPage = SiteGen.createPage({
+  pageOrder: [
+    '/getting-started',
+    '/node-js-middleware',
+    '/asset-management',
+    '/cli'
+  ],
   pageList: function() {
-    var pages = this.props.data.pages.map(function(page) {
-      return <li><a href={page.id + '.html'}>{page.metadata.title}</a></li>;
-    });
+    var pages = new Array(this.pageOrder.length);
+    this.props.data.pages.forEach(function(page) {
+      var idx = this.pageOrder.indexOf(page.id);
+      if (idx === -1) return;
+      pages[idx] = <li><a href={page.id + '.html'}>{page.metadata.title}</a></li>;
+    }.bind(this));
     return <ul className="PageList">{pages}</ul>;
   },
   render: function() {
