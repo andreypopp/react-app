@@ -14,19 +14,15 @@ var __styles = [];
 var __scripts = [];
 
 var AssetInjector = {
-  addStylesheet: function(href) {
-    __styles.push(React.DOM.link({rel: 'stylesheet', href: href}));
+  addStylesheet: function(href, key) {
+    __styles.push(React.DOM.link({rel: 'stylesheet', href: href, key: key}));
   },
-  addScript: function(src) {
-    __scripts.push(React.DOM.script({src: src}));
-  },
-  addCode: function(code) {
-    __scripts.push(React.DOM.script({__dangerouslySetHTML: {__html: code}}));
+  addScript: function(src, key) {
+    __scripts.push(React.DOM.script({src: src, key: key + 100000}));
   },
   injectAssets: function(assets) {
     if (assets.stylesheets) assets.stylesheets.forEach(AssetInjector.addStylesheet);
     if (assets.scripts) assets.scripts.forEach(AssetInjector.addScript);
-    if (assets.codes) assets.codes.forEach(AssetInjector.addCode);
   }
 };
 

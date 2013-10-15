@@ -71,4 +71,10 @@ describe('server rendering', function() {
       });
   });
 
+  it('returns 404 on no match', function(done) {
+    request(app)
+      .get('/somePage')
+      .expect(404, done);
+  });
+
 });

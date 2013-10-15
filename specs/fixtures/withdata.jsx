@@ -37,7 +37,7 @@ module.exports = createPage({
     return (
       <Boilerplate title="With Data!">
         <h1>{this.props.data.message}</h1>
-        <a href="/pages/about"><i class="icon icon-pencil"></i> About page</a>
+        <a href="/pages/about"><i className="icon icon-pencil"></i> About page</a>
         {debugInfo}
       </Boilerplate>
     );
