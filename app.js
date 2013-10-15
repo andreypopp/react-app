@@ -97,13 +97,13 @@ Application.prototype = {
     var page = this.makePage(request);
     if (!page)
       return cb(new NotFoundError(request.path));
-    renderPage(page, document, function(err, page) {
+    renderPage(page, this.spec.document || document, function(err, page) {
       if (err)
         return cb(err);
       this.request = request;
       this.page = page;
       cb(null, this);
-    }.bind(this));
+    }.bind(this), this.spec.forcePageRendering);
   },
 
   makePage: function(request) {

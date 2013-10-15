@@ -34,7 +34,10 @@
     "react-tools": "http://data.andreypopp.com/react-tools-0.5.0-alpha.tgz",
     "mocha": "*",
     "supertest": "0.x.x",
-    "jshint": "~2.1.11"
+    "jshint": "~2.1.11",
+    "phantomjs": "~1.9.2-2",
+    "es5-shim": "~2.1.0",
+    "mocha-phantomjs": "~3.1.5"
   },
   "keywords": [
     "react",

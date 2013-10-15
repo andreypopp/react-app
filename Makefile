@@ -6,8 +6,18 @@ example:
 install link:
 	@npm $@
 
-test:
+test: test-middleware test-browser-headless
+
+test-middleware:
 	@$(BIN)/mocha -b -R spec ./specs/*.js
+
+test-browser-headless:
+	@$(MAKE) -C specs/browser/
+	@$(BIN)/mocha-phantomjs ./specs/index.html
+
+test-browser:
+	@$(MAKE) -C specs/browser/
+	@open ./specs/index.html
 
 lint:
 	@$(BIN)/jshint *.js

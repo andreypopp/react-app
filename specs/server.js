@@ -3,7 +3,7 @@ var ok      = require('assert').ok,
     request = require('supertest'),
     app     = require('./fixtures/server');
 
-describe('server rendering', function() {
+describe('ReactApp server middleware', function() {
 
   it('renders page with data', function(done) {
     request(app)

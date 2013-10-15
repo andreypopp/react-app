@@ -69,7 +69,9 @@ function functionToSpec(func) {
   };
 }
 
-function _renderPage(page, doc, cb) {
+function _renderPage(page, doc, cb, force) {
+  if (force)
+    return cb(null, React.renderComponent(page, doc));
   if (doc.readyState === 'interactive' || doc.readyState === 'complete')
     cb(null, React.renderComponent(page, doc));
   else
@@ -85,12 +87,12 @@ function _renderPage(page, doc, cb) {
  * @param {DocumentElement} doc
  * @param {Callback} cb
  */
-function renderPage(page, doc, cb) {
+function renderPage(page, doc, cb, force) {
   page.bootstrap(function(err, data) {
     if (err) return cb(err);
     _renderPage(page, doc, function(err, page) {
       cb(err, page, data); 
-    });
+    }, force);
   });
 }
 
