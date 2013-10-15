@@ -170,6 +170,7 @@ module.exports = function(id, opts) {
       })
       .then(function(rendered) {
         if (rendered === null) return next();
+        res.setHeader('Content-Type', 'text/html');
         res.write(rendered.markup);
         res.write(injectAssetsOnClient(opts.injectAssets));
         res.write(startAppOnClient(rendered.data));
