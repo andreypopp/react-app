@@ -1,0 +1,60 @@
+color-bg = #fafafa
+color-bg-code = #e8e8e8
+color-text = #555
+color-text-header = #686E75
+color-text-code = #777
+color-text-shaded = #aaa
+
+body
+  color: color-text
+  background: color-bg
+  font-family: 'Myriad Pro', Helvetica, sans-serif
+  font-size: 95%
+  & > *
+    margin: 0 auto
+    width: 600px
+
+a
+  color: color-text
+
+h1, h2, h3, h4, h5, h6
+  color: color-text-header
+  line-height: 2em
+
+p, li, ul
+  line-height: 1.5em
+
+li
+  margin-bottom: 0.5em
+
+p, ul, pre
+  margin-bottom: 1em
+
+code
+  font-family: Menlo, Monaco, monospace
+  font-size: 80%
+  line-height: 1.3em
+  background: color-bg-code
+  padding: 0.3em
+  color: color-text-code
+
+pre
+  padding: 1em
+  background: color-bg-code
+  border-bottom: 1px solid #ccc
+  code
+    padding: 0
+
+.Header
+  padding: 0.5em 0
+  .subtitle
+    text-decoration: none
+    font-size: 50%
+    color: color-text-shaded
+    padding: 0 0.2em
+
+.PageList
+  list-style: none
+  li a
+    text-decoration: none
+    font-weight: bold
