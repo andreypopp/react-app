@@ -39,8 +39,8 @@ describe('ReactApp browser environment', function() {
   var doc, app;
 
   beforeEach(function() {
-    doc = window.doc = document.implementation.createHTMLDocument('<html><head></head><body></body></html>');
-    app = window.app = ReactApp.createApp(utils.assign({document: doc}, spec));
+    doc = document.implementation.createHTMLDocument('');
+    app = ReactApp.createApp(utils.assign({document: doc}, spec));
   });
 
   it('navigates to a page', function(done) {
