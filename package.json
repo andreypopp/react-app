@@ -20,7 +20,7 @@
     "url-pattern": "~0.2.1",
     "kew": "~0.1.7",
     "callsite": "~1.0.0",
-    "reactify": "git+https://github.com/andreypopp/reactify#master",
+    "reactify": "0.4.x",
     "dcompose": "~0.5.x",
     "stream-aggregate-promise": "0.x.x",
     "lodash": "2.x.x",
@@ -31,7 +31,7 @@
     "mimetype": "0.0.5"
   },
   "devDependencies": {
-    "react-tools": "http://data.andreypopp.com/react-tools-0.5.0-alpha.tgz",
+    "react-tools": "0.5.x",
     "mocha": "*",
     "supertest": "0.x.x",
     "jshint": "~2.1.11",
