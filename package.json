@@ -37,7 +37,8 @@
     "jshint": "~2.1.11",
     "phantomjs": "~1.9.2-2",
     "es5-shim": "~2.1.0",
-    "mocha-phantomjs": "~3.1.5"
+    "mocha-phantomjs": "~3.1.5",
+    "semver": "~2.1.0"
   },
   "keywords": [
     "react",
