@@ -17,12 +17,19 @@ var ReactApp      = require('./index'),
       })
       .option('verbose', {
         boolean: true,
+        default: false,
         describe: 'Operate in verbose mode'
       })
       .option('q', {
         alias: 'quiet',
         boolean: true,
+        default: false,
         describe: 'Operate in quiet mode'
+      })
+      .option('colors', {
+        boolean: true,
+        default: true,
+        describe: 'Color logging output'
       })
       .option('v', {
         alias: 'version',
@@ -32,6 +39,7 @@ var ReactApp      = require('./index'),
       .option('d', {
         alias: 'debug',
         boolean: true,
+        default: false,
         describe: 'Run in debug mode'
       })
       .option('p', {
@@ -45,6 +53,7 @@ var ReactApp      = require('./index'),
       })
       .option('render', {
         describe: 'Render UI on server',
+        default: false,
         boolean: true
       })
       .option('t', {
@@ -62,7 +71,7 @@ if (optimist.argv.version) return console.log(version);
 var argv = optimist.argv,
     id = argv._[1],
     logger = getLogger({
-      colors: !argv['no-colors'],
+      colors: argv.colors,
       debug: argv.verbose,
       quiet: argv.quiet
     });

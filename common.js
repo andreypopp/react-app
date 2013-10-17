@@ -29,20 +29,20 @@ function getLogger(opts) {
   return {
     debug: function(msg) {
       if (!opts.quiet && opts.debug)
-        this.log('[debug]'.grey, arguments);
+        this.log('[debug]', arguments);
     },
 
     info: function(msg) {
       if (!opts.quiet)
-        this.log('[info]'.blue, arguments);
+        this.log('[info]', arguments);
     },
 
     warning: function(msg) {
-      this.log('[warning]'.yellow, arguments);
+      this.log('[warning]', arguments);
     },
 
     error: function() {
-      this.log('[error]'.red, arguments);
+      this.log('[error]', arguments);
     },
 
     log: function(level, msgs) {
