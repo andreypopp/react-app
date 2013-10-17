@@ -34,7 +34,6 @@ function createComposer(id, opts) {
 }
 
 function Bundler(id, opts) {
-  this.id = require.resolve(id);
   this.composer = createComposer(id, opts);
   this.composer.on('update', this.onUpdate.bind(this));
   this.bundle = null;
