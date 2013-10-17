@@ -43,6 +43,10 @@ var ReactApp      = require('./index'),
         default: 'localhost',
         describe: 'Host to use'
       })
+      .option('render', {
+        describe: 'Render UI on server',
+        boolean: true
+      })
       .option('t', {
         alias: 'transform',
         describe: 'Apply source transform'
@@ -88,6 +92,6 @@ switch (argv._[0]) {
 }
 
 function error(msg) {
-  Logger.error(msg);
+  logger.error(msg);
   process.exit(1);
 }

@@ -6,5 +6,5 @@ app.get('/api/data', function(req, res) {
   res.send({message: 'Hey there!'});
 });
 
-app.use(ReactApp('./app.jsx', {debug: true}));
+app.use(ReactApp('./app.jsx', {debug: true, render: true}));
 module.exports = app;

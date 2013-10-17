@@ -6,7 +6,9 @@ var utils           = require('lodash'),
     express         = require('express'),
     createBundler   = require('./bundler'),
     serveUI         = require('./middleware/ui'),
+    servePage       = require('./middleware/page'),
     serveAssets     = require('./middleware/assets');
+
 
 module.exports = function(id, opts) {
   opts = utils.assign({
@@ -15,6 +17,7 @@ module.exports = function(id, opts) {
     assetsUrl: '/assets',
     transform: [],
     debug: false,
+    render: false,
     pageOptions: undefined,
   }, opts);
 
@@ -24,9 +27,10 @@ module.exports = function(id, opts) {
   };
   opts.bundler = createBundler(id, opts);
 
-  var app = express();
+  var serveUI = require(opts.render ? './middleware/ui' : './middleware/page'),
+      app = express();
   app.use(opts.assetsUrl, serveAssets(id, opts));
-  app.use(serveUI(id, opts));
+  app.use(serveUI(id, opts))
   return app;
 
 };
