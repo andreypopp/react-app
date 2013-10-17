@@ -2,16 +2,27 @@
 
 var ReactApp      = require('./index'),
     createBundler = require('./bundler'),
+    getLogger     = require('./common').getLogger,
     version       = require('./package.json').version,
+    colors        = require('colors'),
     fs            = require('fs'),
     p             = require('path'),
-    wrap          = require('wordwrap')(79),
+    wrap          = require('wordwrap'),
     optimist      = require('optimist')
       .usage('$0 [options] (bundle|serve)')
       .option('h', {
         alias: 'help',
         boolean: true,
         describe: 'Show this message and exit'
+      })
+      .option('verbose', {
+        boolean: true,
+        describe: 'Operate in verbose mode'
+      })
+      .option('q', {
+        alias: 'quiet',
+        boolean: true,
+        describe: 'Operate in quiet mode'
       })
       .option('v', {
         alias: 'version',
@@ -45,14 +56,21 @@ if (optimist.argv.help) return optimist.showHelp();
 if (optimist.argv.version) return console.log(version);
 
 var argv = optimist.argv,
-    id = argv._[1];
+    id = argv._[1],
+    logger = getLogger({
+      colors: !argv['no-colors'],
+      debug: argv.verbose,
+      quiet: argv.quiet
+    });
 
 argv.root = process.cwd();
+argv.logger = logger;
 
 switch (argv._[0]) {
   case 'serve':
     if (!id) error('provide module id as an argument');
     ReactApp(id, argv).listen(argv.port, argv.host);
+    logger.info('start serving on ' + argv.host + ':' +argv.port);
     break;
   case 'bundle':
     var output = argv.output || argv.o || '.';
@@ -70,6 +88,6 @@ switch (argv._[0]) {
 }
 
 function error(msg) {
-  console.error(wrap('error: ' + msg));
+  Logger.error(msg);
   process.exit(1);
 }

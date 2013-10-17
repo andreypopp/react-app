@@ -7,7 +7,8 @@ var path          = require('path'),
     utils         = require('lodash'),
     aggregate     = require('stream-aggregate-promise'),
     dcompose      = require('dcompose'),
-    reactify      = require('reactify');
+    reactify      = require('reactify'),
+    measure       = require('./common').measure;
 
 function createComposer(id, opts) {
   var entry = {
@@ -33,21 +34,34 @@ function createComposer(id, opts) {
 }
 
 function Bundler(id, opts) {
+  this.id = require.resolve(id);
   this.composer = createComposer(id, opts);
-  this.composer.on('update', this.build.bind(this));
+  this.composer.on('update', this.onUpdate.bind(this));
   this.bundle = null;
+  this.logger = opts.logger;
   this.build();
 }
 
 utils.assign(Bundler.prototype, EventEmitter.prototype, {
-  build: function() {
-    this.emit('update');
-    this.bundle = q.all([this.composer.js(), this.composer.css()])
-      .then(function(bundles) { return bundles.map(aggregate) })
-      .then(function(bundles) {
-        return {'bundle.js': bundles[0], 'bundle.css': bundles[1]}
-      });
-  }
+  onUpdate: function(filename) {
+    if (this.logger)
+      this.logger.info(
+        'change detected in',
+        path.relative(process.cwd(), filename));
+    this.build();
+  },
+
+  build: measure(
+    'bundle built:',
+    function(filename) {
+      this.bundle = q.all([this.composer.js(), this.composer.css()])
+        .then(function(bundles) { return bundles.map(aggregate) })
+        .then(function(bundles) {
+          return {'bundle.js': bundles[0], 'bundle.css': bundles[1]}
+        });
+      this.emit('update', filename);
+      return this.bundle;
+    })
 });
 
 module.exports = function(id, opts) {

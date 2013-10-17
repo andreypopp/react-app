@@ -1,7 +1,7 @@
 BIN = ./node_modules/.bin
 
 example:
-	./react-app serve --debug ./specs/fixtures/app.jsx
+	@./react-app serve --verbose --debug ./specs/fixtures/app.jsx
 
 install link:
 	@npm $@

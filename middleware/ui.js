@@ -9,7 +9,8 @@ var path                = require('path'),
     q                   = require('kew'),
     SourceMapConsumer   = require('source-map').SourceMapConsumer,
     makeXMLHttpRequest  = require('../xmlhttprequest'),
-    createBundler       = require('../bundler');
+    createBundler       = require('../bundler'),
+    measure             = require('../common').measure;
 
 function retrieveSourceMap(source) {
   // Get the URL of the source map
@@ -93,23 +94,32 @@ function makeLocation(req, origin) {
   return url.parse(reqOrigin + req.originalUrl);
 }
 
-function scriptBuilder(bundler) {
+function scriptBuilder(bundler, opts) {
   var builder = {
     script: null,
 
-    build: function () {
-      this.script = bundler.bundle
-        .then(function(bundle) {return bundle['bundle.js']})
-        .then(function(bundle) {
-          return {
-            script: vm.createScript(bundle),
-            sourceMap: retrieveSourceMap(bundle)
-          }
-        });
-    }
+    logger: opts.logger,
+
+    onUpdate: function() {
+      this.build();
+    },
+
+    build: measure(
+      'script built:',
+      function() {
+        this.script = bundler.bundle
+          .then(function(bundle) {return bundle['bundle.js']})
+          .then(function(bundle) {
+            return {
+              script: vm.createScript(bundle),
+              sourceMap: retrieveSourceMap(bundle)
+            }
+          });
+        return this.script;
+      })
   };
 
-  bundler.on('update', builder.build.bind(builder));
+  bundler.on('update', builder.onUpdate.bind(builder));
   builder.build();
 
   return builder;
@@ -158,7 +168,7 @@ var startAppOnClient = compileToBrowser(function(data) {
 
 module.exports = function(id, opts) {
   var bundler = opts.bundler || createBundler(id, opts),
-      builder = scriptBuilder(bundler);
+      builder = scriptBuilder(bundler, opts);
 
   return function(req, res, next) {
     var request = {path: req.path, query: req.query},

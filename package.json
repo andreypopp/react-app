@@ -21,14 +21,15 @@
     "kew": "~0.1.7",
     "callsite": "~1.0.0",
     "reactify": "0.4.x",
-    "dcompose": "~0.5.x",
+    "dcompose": ">= 0.5.1 < 0.6.0",
     "stream-aggregate-promise": "0.x.x",
     "lodash": "2.x.x",
     "lodash.clonedeep": "~2.1.0",
     "optimist": "~0.6.0",
     "wordwrap": "0.0.2",
     "source-map": "~0.1.30",
-    "mimetype": "0.0.5"
+    "mimetype": "0.0.5",
+    "colors": "~0.6.2"
   },
   "devDependencies": {
     "react-tools": "0.5.x",
