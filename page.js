@@ -34,7 +34,7 @@ var Page = React.createClass({
   },
 
   bootstrap: function(cb, isMounted) {
-    var getDataNow = !ExecutionEnvironment.canUseDOM || isMounted || !this.props.options.renderBeforeDataOnClient;
+    var getDataNow = !ExecutionEnvironment.canUseDOM || isMounted || !this.props.app.spec.renderBeforeDataOnClient;
     if (getDataNow && !this.props.data && this.props.spec.getData)
       callbackOrPromise(this.props.spec.getData, function(err, data) {
         if (err) return cb(err);
