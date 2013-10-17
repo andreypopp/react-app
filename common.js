@@ -1,9 +1,15 @@
 var utils         = require('lodash');
 
-function measure(msg, func) {
+/**
+ * Measure time of a async method
+ *
+ * @param {String} msg Message to emit at debug level
+ * @param {Function} method Method which returns a promise
+ */
+function measure(msg, method) {
   return function() {
     var start = new Date();
-    return func.apply(this, arguments).then(function(result) {
+    return method.apply(this, arguments).then(function(result) {
       if (this.logger)
         this.logger.debug(msg, new Date() - start, 'ms');
       return result;
@@ -11,6 +17,11 @@ function measure(msg, func) {
   }
 }
 
+/**
+ * Create a logger
+ *
+ * @param {Options} opts - 'debug', 'quiet' and 'colors'
+ */
 function getLogger(opts) {
   if (opts.colors)
     require('colors');
