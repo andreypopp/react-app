@@ -55,9 +55,14 @@ utils.assign(Bundler.prototype, EventEmitter.prototype, {
     function(filename) {
       this.bundle = q.all([this.composer.js(), this.composer.css()])
         .then(function(bundles) { return bundles.map(aggregate) })
+        .fail(function(err) {
+          if (this.logger)
+            this.logger.error(err);
+          throw err;
+        }.bind(this))
         .then(function(bundles) {
           return {'bundle.js': bundles[0], 'bundle.css': bundles[1]}
-        });
+        }.bind(this))
       this.emit('update', filename);
       return this.bundle;
     })
