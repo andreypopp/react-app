@@ -64,4 +64,32 @@ describe('ReactApp browser environment', function() {
       });
     });
   });
+
+  describe('Page.isMounted()', function() {
+
+
+    it('returns true on a mounted page component', function(done) {
+      app.process({path: '/'}, function(err, result) {
+        if (err) return done(err);
+        assert.ok(app.page);
+        assert.ok(app.page.isMounted());
+        done();
+      });
+    });
+
+    it('returns true after page re-render on a nvaigation', function(done) {
+      app.process({path: '/'}, function(err, result) {
+        if (err) return done(err);
+        assert.ok(app.page);
+        assert.ok(app.page.isMounted());
+        app.process({path: '/page'}, function(err, result) {
+          assert.ok(app.page);
+          assert.ok(app.page.isMounted());
+          done();
+        });
+      });
+    });
+
+  });
+
 });
