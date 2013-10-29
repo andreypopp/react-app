@@ -137,7 +137,7 @@ Application.prototype = {
     while (current) {
       if (current.tagName === 'A') {
         var href = current.attributes.href && current.attributes.href.value;
-        if (href && !href.match(/^https?:/)) {
+        if (href && !href.match(/^https?:/) && !href.match(/^data:/)) {
           e.preventDefault();
           this.navigate(href);
         }
