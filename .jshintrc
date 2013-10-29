@@ -18,6 +18,7 @@
     "setTimeout": false,
     "setInterval": false,
     "clearTimeout": false,
-    "clearInterval": false
+    "clearInterval": false,
+    "__react_app_source_map": false
   }
 }

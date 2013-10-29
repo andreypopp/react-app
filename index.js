@@ -5,8 +5,6 @@ var utils           = require('lodash'),
     callsite        = require('callsite'),
     express         = require('express'),
     createBundler   = require('./bundler'),
-    serveUI         = require('./middleware/ui'),
-    servePage       = require('./middleware/page'),
     serveAssets     = require('./middleware/assets');
 
 

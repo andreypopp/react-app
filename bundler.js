@@ -5,10 +5,21 @@ var path          = require('path'),
     q             = require('kew'),
     callsite      = require('callsite'),
     utils         = require('lodash'),
-    aggregate     = require('stream-aggregate-promise'),
     dcompose      = require('dcompose'),
     reactify      = require('reactify'),
     measure       = require('./common').measure;
+
+var SERVER_RUNTIME = {
+  id: require.resolve('./runtime/server'),
+  expose: 'react-app/runtime/server',
+  entry: false
+};
+
+var RUNTIME = {
+  id: require.resolve('./runtime/browser'),
+  expose: 'react-app/runtime/browser',
+  entry: false
+};
 
 function createComposer(id, opts) {
   var entry = {
@@ -16,18 +27,12 @@ function createComposer(id, opts) {
     expose: id,
     entry: false
   };
-  var serverRuntime = {
-    id: require.resolve('./runtime/server'),
-    expose: 'react-app/runtime/server',
-    entry: false
-  };
-  var runtime = {
-    id: require.resolve('./runtime/browser'),
-    expose: 'react-app/runtime/browser',
-    entry: false,
-    deps: {app: entry.id}
-  };
-  return dcompose([entry, runtime, serverRuntime], {
+  var entries = [
+    entry,
+    utils.assign({deps: {app: entry.id}}, RUNTIME),
+    utils.assign({}, SERVER_RUNTIME)
+  ];
+  return dcompose(entries, {
     transform: [].concat(opts.transform, reactify),
     debug: opts.debug
   });
@@ -53,16 +58,17 @@ utils.assign(Bundler.prototype, EventEmitter.prototype, {
   build: measure(
     'bundle built:',
     function(filename) {
-      this.bundle = q.all([this.composer.js(), this.composer.css()])
-        .then(function(bundles) { return bundles.map(aggregate) })
-        .fail(function(err) {
-          if (this.logger)
-            this.logger.error(err);
-          throw err;
-        }.bind(this))
+      var logger = this.logger;
+      this.bundle = q.all([
+          this.composer.bundleJS().asPromise(),
+          this.composer.bundleCSS().asPromise()])
         .then(function(bundles) {
           return {'bundle.js': bundles[0], 'bundle.css': bundles[1]}
-        }.bind(this))
+        })
+        .fail(function(err) {
+          logger.error(err);
+          throw err;
+        });
       this.emit('update', filename);
       return this.bundle;
     })

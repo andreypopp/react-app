@@ -7,7 +7,6 @@ module.exports = function(id, opts) {
       '    <link rel="stylesheet" href="' + opts.assetsUrl + '/bundle.css" />',
       '    <script src="' + opts.assetsUrl + '/bundle.js"></script>',
       '    <script>',
-      '      global = self;',
       '      require("react-app/runtime/browser").injectAssets(' + JSON.stringify(opts.injectAssets) + ');',
       '      require("' + id + '").start();',
       '    </script>',

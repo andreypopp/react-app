@@ -66,7 +66,6 @@ function generateMarkup(bundle, request, location, opts) {
 
     sandbox.self = sandbox;
     sandbox.window = sandbox;
-    sandbox.global = sandbox;
 
     var ctx = vm.createContext(sandbox);
     if (opts.debug) patchStackTraceScript.runInContext(ctx);

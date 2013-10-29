@@ -87,13 +87,9 @@ switch (argv._[0]) {
     break;
   case 'bundle':
     var output = argv.output || argv.o || '.';
-    var bundler = createBundler(id, argv).bundle.then(function(streams) {
-      for (var name in streams)
-        (function(name) {
-          streams[name].then(function(bundle) {
-            fs.writeFileSync(p.join(output, name), bundle);
-          }).end();
-        })(name);
+    var bundler = createBundler(id, argv).bundle.then(function(bundles) {
+      for (var name in bundles)
+        fs.writeFileSync(p.join(output, name), bundles[name]);
     }).end();
     break;
   default:

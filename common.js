@@ -1,4 +1,6 @@
-var utils         = require('lodash');
+"use strict";
+
+var utils = require('lodash');
 
 /**
  * Measure time of a async method
@@ -53,7 +55,7 @@ function getLogger(opts) {
           case '[warning]': level = level.yellow; break;
           case '[error]': level = level.red; break;
         }
-      args = [level].concat(utils.toArray(msgs));
+      var args = [level].concat(utils.toArray(msgs));
       console.warn.apply(console, args);
     }
   };
