@@ -60,6 +60,9 @@ var ReactApp      = require('./index'),
         alias: 'transform',
         describe: 'Apply source transform'
       })
+      .option('global-transform', {
+        describe: 'Apply global source transform'
+      })
       .option('o', {
         alias: 'output',
         describe: 'Output directory for bundle'
@@ -78,6 +81,7 @@ var argv = optimist.argv,
 
 argv.root = process.cwd();
 argv.logger = logger;
+argv.globalTransform = argv['global-transform'];
 
 switch (argv._[0]) {
   case 'serve':

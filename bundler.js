@@ -34,6 +34,7 @@ function createComposer(id, opts) {
   ];
   return dcompose(entries, {
     transform: [].concat(opts.transform, reactify),
+    globalTransform: [].concat(opts.globalTransform),
     debug: opts.debug
   });
 }
