@@ -1,6 +1,6 @@
 {
   "name": "react-app",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Server side rendering for React apps with Express",
   "main": "./index.js",
   "browser": "./browser.js",
@@ -21,7 +21,7 @@
     "kew": "~0.1.7",
     "callsite": "~1.0.0",
     "reactify": "0.4.x",
-    "dcompose": ">= 0.8.0",
+    "dcompose": ">= 0.9.0",
     "stream-aggregate-promise": "0.x.x",
     "lodash": "2.x.x",
     "lodash.clonedeep": "~2.1.0",
