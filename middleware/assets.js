@@ -12,15 +12,11 @@ module.exports = function(id, opts) {
         var bundleName = req.url.slice(1),
             bundle = bundles[bundleName];
 
-        if (!bundle) return next();
+        if (bundle === undefined) return next();
 
         res.setHeader('Content-Type', mimetype.lookup(bundleName));
-        return bundle;
-      })
-      .then(function(bundle) {
         res.send(bundle);
-      })
-      .fail(next);
+      }, next);
   }
 }
 
