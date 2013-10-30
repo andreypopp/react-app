@@ -67,7 +67,7 @@ utils.assign(Bundler.prototype, EventEmitter.prototype, {
           return {'bundle.js': bundles[0], 'bundle.css': bundles[1]}
         })
         .fail(function(err) {
-          logger.error(err);
+          if (logger) logger.error(err);
           throw err;
         });
       this.emit('update', filename);
