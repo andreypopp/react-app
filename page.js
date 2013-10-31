@@ -9,7 +9,7 @@
 var React = require('react-tools/build/modules/React'),
     cloneDeep = require('lodash.clonedeep');
 
-var Page = React.createClass({
+var PageHost = React.createClass({
   render: function() {
     return this.props.spec.render.call(this);
   },
@@ -20,6 +20,7 @@ var Page = React.createClass({
   },
 
   componentDidUpdate: function() {
+    this.props.spec = bindSpec(this.props.unboundSpec, this);
     if (this.props.spec.pageDidMount) this.props.spec.pageDidMount();
   },
 
@@ -54,10 +55,11 @@ function callbackOrPromise(func, cb) {
 function bindSpec(spec, component) {
   var boundSpec = Object.create(component);
   for (var id in spec)
-    if (typeof spec[id] === 'function')
-      boundSpec[id] = spec[id].bind(boundSpec)
-    else
-      boundSpec[id] = spec[id];
+    if (spec.hasOwnProperty(id))
+      if (typeof spec[id] === 'function')
+        boundSpec[id] = spec[id].bind(boundSpec)
+      else
+        boundSpec[id] = spec[id];
   return boundSpec;
 }
 
@@ -120,7 +122,7 @@ function createPage(spec) {
   if (typeof spec === 'function')
     spec = functionToSpec(spec);
   return function(props, children) {
-    var page = Page(props, children),
+    var page = PageHost(props, children),
         boundSpec = bindSpec(spec, page);
     props.unboundSpec = spec;
     props.spec = boundSpec;
