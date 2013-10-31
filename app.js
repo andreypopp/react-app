@@ -100,6 +100,9 @@ Application.prototype = {
     renderPage(page, this.spec.document || document, function(err, page) {
       if (err)
         return cb(err);
+      page.bootstrap(function () {
+          this.setProps(this.props);
+        }.bind(page), true);
       this.request = request;
       this.page = page;
       cb(null, this);

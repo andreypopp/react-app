@@ -7,6 +7,7 @@
 "use strict";
 
 var React = require('react-tools/build/modules/React'),
+    ExecutionEnvironment = require('react-tools/build/modules/ExecutionEnvironment'),
     cloneDeep = require('lodash.clonedeep');
 
 var PageHost = React.createClass({
@@ -33,8 +34,9 @@ var PageHost = React.createClass({
     if (this.props.spec.pageWillUnmount) this.props.spec.pageWillUnmount();
   },
 
-  bootstrap: function(cb) {
-    if (!this.props.data && this.props.spec.getData)
+  bootstrap: function(cb, isMounted) {
+    var getDataNow = !ExecutionEnvironment.canUseDOM || isMounted || !this.props.app.spec.renderBeforeDataOnClient;
+    if (getDataNow && !this.props.data && this.props.spec.getData)
       callbackOrPromise(this.props.spec.getData, function(err, data) {
         if (err) return cb(err);
         this.props.data = cloneDeep(data);
@@ -93,7 +95,7 @@ function renderPage(page, doc, cb, force) {
   page.bootstrap(function(err, data) {
     if (err) return cb(err);
     _renderPage(page, doc, function(err, page) {
-      cb(err, page, data); 
+      cb(err, page, data);
     }, force);
   });
 }
