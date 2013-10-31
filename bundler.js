@@ -32,11 +32,8 @@ function createComposer(id, opts) {
     utils.assign({deps: {app: entry.id}}, RUNTIME),
     utils.assign({}, SERVER_RUNTIME)
   ];
-  return dcompose(entries, {
-    transform: [].concat(opts.transform, reactify),
-    globalTransform: [].concat(opts.globalTransform),
-    debug: opts.debug
-  });
+  opts.transform = [].concat(opts.transform, reactify);
+  return dcompose(entries, opts);
 }
 
 function Bundler(id, opts) {
