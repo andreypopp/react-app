@@ -12,6 +12,18 @@ var path                = require('path'),
     createBundler       = require('../bundler'),
     measure             = require('../common').measure;
 
+function escape(str) {
+  return String(str)
+    .replace(/</g, '&#0001;')
+    .replace(/>/g, '&#0002;');
+}
+
+function unescape(str) {
+  return String(str)
+    .replace(/&#0001;/g, '<')
+    .replace(/&#0002;/g, '>');
+}
+
 function retrieveSourceMap(source) {
   // Get the URL of the source map
   var match = /\/\/[#@]\s*sourceMappingURL=(.*)\s*$/m.exec(source);
@@ -126,9 +138,12 @@ function scriptBuilder(bundler, opts) {
 
 function compileToBrowser(func) {
   var code = func.toString();
+  var unescapeOnClient = "(" + unescape.toString() + ")";
   return function() {
     var args = utils.toArray(arguments);
-    return "<script>(" + code + ").apply(this, " + JSON.stringify(args) + ")</script>";
+    args = escape(JSON.stringify(JSON.stringify(args)));
+    return ("<script>(" + code + ").apply(this, JSON.parse(" +
+        unescapeOnClient + "(" +  args + ")));</script>");
   }
 }
 
@@ -155,7 +170,6 @@ var injectAssetsOnServer = compileToVM(function(assets) {
 });
 
 var injectAssetsOnClient = compileToBrowser(function(assets) {
-  global = self;
   var runtime = require('react-app/runtime/browser');
   runtime.injectAssets(assets);
 });
