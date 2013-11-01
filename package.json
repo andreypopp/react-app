@@ -18,7 +18,7 @@
     "xhr2": "*",
     "express": "3.x.x",
     "url-pattern": "~0.2.1",
-    "kew": "~0.1.7",
+    "kew": "~0.3.0",
     "callsite": "~1.0.0",
     "reactify": "0.4.x",
     "dcompose": ">= 0.10.0",
