@@ -1,6 +1,6 @@
 {
   "name": "react-app",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "Server side rendering for React apps with Express",
   "main": "./index.js",
   "browser": "./browser.js",
