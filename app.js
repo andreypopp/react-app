@@ -192,6 +192,7 @@ function throwAsync(err) {
  */
 function NotFoundError(url) {
   Error.call(this, 'not found: ' + url);
+  this.name = 'NotFoundError';
   this.url = url;
   this.isNotFound = true;
 }
