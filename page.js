@@ -71,14 +71,23 @@ function functionToSpec(func) {
   };
 }
 
+function renderComponent(component, element, cb) {
+  try {
+    component = React.renderComponent(component, element);
+  } catch (err) {
+    return cb(err);
+  }
+  cb(null, component);
+}
+
 function _renderPage(page, doc, cb, force) {
   if (force)
-    return cb(null, React.renderComponent(page, doc));
+    renderComponent(page, doc, cb);
   if (doc.readyState === 'interactive' || doc.readyState === 'complete')
-    cb(null, React.renderComponent(page, doc));
+    renderComponent(page, doc, cb);
   else
     window.addEventListener('DOMContentLoaded', function() {
-      cb(null, React.renderComponent(page, doc));
+      renderComponent(page, doc, cb);
     });
 }
 

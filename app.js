@@ -44,6 +44,8 @@ Application.prototype = {
       path: window.location.pathname,
       query: qs.parse(window.location.search.slice(1)),
       data: data
+    }, function(err) {
+      if (err) throwAsync(err);
     });
   },
 
@@ -59,7 +61,9 @@ Application.prototype = {
     if (request.query)
       url = url + '?' + qs.stringify(request.query);
     window.history.pushState(null, '', url);
-    this.process(request);
+    this.process(request, function(err) {
+      if (err) throwAsync(err);
+    });
   },
 
   /**
@@ -129,6 +133,8 @@ Application.prototype = {
     this.process({
       path: window.location.pathname,
       query: qs.parse(window.location.search.slice(1))
+    }, function(err) {
+      if (err) throwAsync(err);
     });
   },
 
@@ -173,6 +179,10 @@ function parseURL(url) {
   } else {
     return {path: url};
   }
+}
+
+function throwAsync(err) {
+  setTimeout(function() { throw err; }, 0);
 }
 
 /**
