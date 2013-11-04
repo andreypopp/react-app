@@ -13,6 +13,8 @@ var React = require('react-tools/build/modules/React'),
 
 module.exports = createPage({
   onClick: function() {
+    console.log('setState');
+    this.setState({});
     console.log('y');
   },
   pageDidMount: function() {
