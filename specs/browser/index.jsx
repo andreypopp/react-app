@@ -17,62 +17,95 @@ var Boilerplate = React.createClass({
   }
 });
 
-var spec = {
-  routes: {
-    '/': ReactApp.createPage({
-      render: function() {
-        return <Boilerplate>index</Boilerplate>;
-      }
-    }),
-
-    '/page': ReactApp.createPage({
-      render: function() {
-        return <Boilerplate>page</Boilerplate>;
-      }
-    }),
-  },
-  forcePageRendering: true
-};
 
 describe('ReactApp browser environment', function() {
 
   var doc, app;
 
-  beforeEach(function() {
-    doc = document.implementation.createHTMLDocument('');
-    app = ReactApp.createApp(utils.assign({document: doc}, spec));
-  });
+  describe('navigation', function() {
+    var spec = {
+      routes: {
+        '/': ReactApp.createPage({
+          render: function() {
+            return <Boilerplate>index</Boilerplate>;
+          }
+        }),
 
-  it('navigates to a page', function(done) {
-    app.process({path: '/'}, function(err, result) {
-      if (err) return done(err);
-      var markup = doc.documentElement.innerHTML;
-      assert.ok(markup.match(/>index<\/body>/));
-      done();
+        '/page': ReactApp.createPage({
+          render: function() {
+            return <Boilerplate>page</Boilerplate>;
+          }
+        }),
+      },
+      forcePageRendering: true
+    };
+
+    beforeEach(function() {
+      doc = document.implementation.createHTMLDocument('');
+      app = ReactApp.createApp(utils.assign({document: doc}, spec));
     });
-  });
 
-  it('re-renders page on successful navigation', function(done) {
-    app.process({path: '/'}, function(err, result) {
-      if (err) return done(err);
-      var markup = doc.documentElement.innerHTML;
-      assert.ok(markup.match(/>index<\/body>/));
-      app.process({path: '/page'}, function(err, result) {
+    it('navigates to a page', function(done) {
+      app.process({path: '/'}, function(err, result) {
+        if (err) return done(err);
         var markup = doc.documentElement.innerHTML;
-        assert.ok(markup.match(/>page<\/body>/));
+        assert.ok(markup.match(/>index<\/body>/));
         done();
+      });
+    });
+
+    it('re-renders page on successful navigation', function(done) {
+      app.process({path: '/'}, function(err, result) {
+        if (err) return done(err);
+        var markup = doc.documentElement.innerHTML;
+        assert.ok(markup.match(/>index<\/body>/));
+        app.process({path: '/page'}, function(err, result) {
+          var markup = doc.documentElement.innerHTML;
+          assert.ok(markup.match(/>page<\/body>/));
+          done();
+        });
       });
     });
   });
 
   describe('Page.isMounted()', function() {
+    var isMounted;
+    var spec = {
+      routes: {
+        '/': ReactApp.createPage({
+          pageDidMount: function() {
+            isMounted.push(this.isMounted());
+          },
+          render: function() {
+            return <Boilerplate>index</Boilerplate>;
+          }
+        }),
 
+        '/page': ReactApp.createPage({
+          pageDidMount: function() {
+            isMounted.push(this.isMounted());
+          },
+          render: function() {
+            return <Boilerplate>page</Boilerplate>;
+          }
+        }),
+      },
+      forcePageRendering: true
+    };
+
+    beforeEach(function() {
+      isMounted = [];
+      doc = document.implementation.createHTMLDocument('');
+      app = ReactApp.createApp(utils.assign({document: doc}, spec));
+    });
 
     it('returns true on a mounted page component', function(done) {
       app.process({path: '/'}, function(err, result) {
         if (err) return done(err);
         assert.ok(app.page);
         assert.ok(app.page.isMounted());
+        assert.equal(isMounted.length, 1)
+        assert.ok(isMounted.every(function(m) { return m; }));
         done();
       });
     });
@@ -85,7 +118,12 @@ describe('ReactApp browser environment', function() {
         app.process({path: '/page'}, function(err, result) {
           assert.ok(app.page);
           assert.ok(app.page.isMounted());
-          done();
+          app.process({path: '/'}, function(err, result) {
+            assert.ok(app.page.isMounted());
+            assert.equal(isMounted.length, 3)
+            assert.ok(isMounted.every(function(m) { return m; }));
+            done();
+          });
         });
       });
     });
