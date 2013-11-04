@@ -20,7 +20,7 @@ var PageHost = React.createClass({
   },
 
   componentDidUpdate: function() {
-    rebindSpec(this.props.spec, this);
+    this.props.spec = bindSpec(this.props.spec, this);
     if (this.props.spec.pageDidMount) this.props.spec.pageDidMount();
   },
 
@@ -57,19 +57,12 @@ function bindSpec(spec, component) {
   for (var id in spec)
     if (spec.hasOwnProperty(id))
       if (typeof spec[id] === 'function')
-        boundSpec[id] = bindFunction(spec[id], boundSpec)
+        boundSpec[id] = (typeof spec[id].rebind === 'function') ?
+          spec[id].rebind(boundSpec) :
+          bindFunction(spec[id], boundSpec);
       else
         boundSpec[id] = spec[id];
   return boundSpec;
-}
-
-function rebindSpec(spec, component) {
-  spec.__proto__ = component;
-  for (var id in spec)
-    if (spec.hasOwnProperty(id))
-      if (typeof spec[id] === 'function')
-        spec[id].rebind(component);
-  return spec;
 }
 
 function functionToSpec(func) {
