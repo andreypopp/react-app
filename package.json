@@ -21,7 +21,7 @@
     "kew": "~0.3.0",
     "callsite": "~1.0.0",
     "reactify": "0.4.x",
-    "dcompose": ">= 0.10.0",
+    "dcompose": ">= 0.10.0 < 0.12.0",
     "stream-aggregate-promise": "0.x.x",
     "lodash": "2.x.x",
     "lodash.clonedeep": "~2.1.0",
