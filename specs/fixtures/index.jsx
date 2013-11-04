@@ -21,10 +21,13 @@ module.exports = createPage({
   pageWillUnmount: function() {
     console.log('unmount', 'index');
   },
+  callback: function () {
+    console.info(this.isMounted());
+  },
   render: function() {
     var debugInfo = DebugInfo({request: this.props.request});
     return (
-      <Boilerplate title="Index">
+      <Boilerplate title="Index" callback={this.callback}>
         <div onClick={this.onClick}>
           <h1>Hello, index!</h1>
           <a href="/pages/about"><i className="icon icon-pencil"></i> About page</a>
