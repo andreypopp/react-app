@@ -36,6 +36,12 @@ var ReactApp      = require('./index'),
         boolean: true,
         describe: 'Show version'
       })
+      .option('w', {
+        alias: 'watch',
+        boolean: true,
+        default: false,
+        describe: 'Watch sources for changes'
+      })
       .option('d', {
         alias: 'debug',
         boolean: true,
