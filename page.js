@@ -20,7 +20,7 @@ var PageHost = React.createClass({
   },
 
   componentDidUpdate: function() {
-    this.props.spec = bindSpec(this.props.unboundSpec, this);
+    rebindSpec(this.props.spec, this);
     if (this.props.spec.pageDidMount) this.props.spec.pageDidMount();
   },
 
@@ -57,10 +57,19 @@ function bindSpec(spec, component) {
   for (var id in spec)
     if (spec.hasOwnProperty(id))
       if (typeof spec[id] === 'function')
-        boundSpec[id] = spec[id].bind(boundSpec)
+        boundSpec[id] = bindFunction(spec[id], boundSpec)
       else
         boundSpec[id] = spec[id];
   return boundSpec;
+}
+
+function rebindSpec(spec, component) {
+  spec.__proto__ = component;
+  for (var id in spec)
+    if (spec.hasOwnProperty(id))
+      if (typeof spec[id] === 'function')
+        spec[id].rebind(component);
+  return spec;
 }
 
 function functionToSpec(func) {
@@ -137,6 +146,38 @@ function createPage(spec) {
     props.spec = boundSpec;
     return page;
   }
+}
+
+function bindFunction(func, obj) {
+  var bound,
+      ctx = obj;
+  switch (func.length) {
+    case 0:
+      bound = function() {return func.call(ctx);};
+      break;
+    case 1:
+      bound = function(a) {return func.call(ctx, a);};
+      break;
+    case 2:
+      bound = function(a, b) {return func.call(ctx, a, b);};
+      break;
+    case 3:
+      bound = function(a, b, c) {return func.call(ctx, a, b, c);};
+      break;
+    case 4:
+      bound = function(a, b, c, d) {return func.call(ctx, a, b, c, d);};
+      break;
+    case 5:
+      bound = function(a, b, c, d, e) {return func.call(ctx, a, b, c, d, e);};
+      break;
+    default:
+      bound = function() {return func.apply(ctx, arguments);}
+  }
+  bound.rebind = function(obj) {
+    ctx = obj;
+    return bound;
+  }
+  return bound;
 }
 
 module.exports = {
