@@ -1,2 +1,2 @@
 build:
-	@../../react-app bundle ./index.jsx
+	@../../react-app bundle ./index.jsx > bundle.js
