@@ -80,12 +80,11 @@ The next option is to bootstrap your application with your own code:
 
 Now you can produce code for your application with the following command:
 
-    % react-app bundle ./index.jsx
+    % react-app bundle ./index.jsx > ./index.bundle.js
 
 And create a host page:
 
     <!doctype html>
-    <link rel="stylesheet" href="index.bundle.css" />
     <script src="index.bundle.js"></script>
     <script>
       app = require('./index');
@@ -125,41 +124,25 @@ Alternatively you can use separate middleware for assets and UI pre-rendering.
     app.use(serveUI(bundler));
     app.listen(3000);
 
-### Advanced asset management
-
 ### Command line interface reference
 
 Help is accessible via `react-app --help`:
 
     % react-app --help
-    Usage:
-      react-app serve [serve options] app
-      react-app bundle [bundle options] app
 
-    Common options:
-      --help/-h           Show this message and exit
-      --version/-v        Print ReactApp version and exit
-      --quiet             Do not print information and warning messages
-      --verbose           Print debug messages
-      --no-color          Do not colour output
-
-    Serve options:
-      --port/-p PORT      Port to use (default: 3000)
-      --host HOST         Host to use (default: localhost)
-      --debug/-d          Should app be served in debug mode
-
-    Bundle options:       options are the same as for dcompose bundler utility
-      -o, --output OUT    Set output directory
-      -w, --watch         Watch for changes and rebuild bundles
-                          (-o/--output must be supplied)
-
-      --debug/-d          Produce bundle with source maps
-      --graph             Produce only dependency graph and pring it on stdout
-
-      --transform/-t TR   Apply transform
-      --extension EXT     File extensions to treat as modules (default: .js)
-
-      --js                Produce bundle of JS dependency graph only
-                          (this is the default behaviour)
-      --css               Produce bundle of CSS dependency graph only
-      --all               Produce bundle of both CSS and JS dependency graphs
+    Options:
+      -h, --help          Show this message and exit
+      --verbose           Operate in verbose mode        [default: false]
+      -q, --quiet         Operate in quiet mode          [default: false]
+      --colors            Color logging output           [default: true]
+      -v, --version       Show version
+      -w, --watch         Watch sources for changes      [default: false]
+      -d, --debug         Run in debug mode              [default: false]
+      -p, --port          Port to use                    [default: 3000]
+      --host              Host to use                    [default: "localhost"]
+      --render            Render UI on server            [default: false]
+      -t, --transform     Apply source transform
+      --global-transform  Apply global source transform
+      -o, --output        Output directory for bundle
+      --css               Bundle only CSS dependencies   [default: false]
+      --js                Bundle only JS dependencies    [default: false]
