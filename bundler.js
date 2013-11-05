@@ -76,3 +76,4 @@ module.exports = function(id, opts) {
   opts.root = opts.root || path.dirname(callsite()[1].getFileName());
   return new Bundler(id, opts);
 }
+module.exports.createComposer = createComposer;

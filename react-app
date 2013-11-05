@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
-var ReactApp      = require('./index'),
-    createBundler = require('./bundler'),
-    getLogger     = require('./common').getLogger,
-    version       = require('./package.json').version,
-    colors        = require('colors'),
-    fs            = require('fs'),
-    p             = require('path'),
-    wrap          = require('wordwrap'),
-    optimist      = require('optimist')
+var ReactApp       = require('./index'),
+    createComposer = require('./bundler').createComposer,
+    getLogger      = require('./common').getLogger,
+    version        = require('./package.json').version,
+    colors         = require('colors'),
+    fs             = require('fs'),
+    p              = require('path'),
+    wrap           = require('wordwrap'),
+    optimist       = require('optimist')
       .usage('$0 [options] (bundle|serve)')
       .option('h', {
         alias: 'help',
@@ -73,6 +73,16 @@ var ReactApp      = require('./index'),
         alias: 'output',
         describe: 'Output directory for bundle'
       })
+      .option('css', {
+        boolean: true,
+        default: false,
+        describe: 'Bundle only CSS dependencies'
+      })
+      .option('js', {
+        boolean: true,
+        default: false,
+        describe: 'Bundle only JS dependencies'
+      })
 
 if (optimist.argv.help) return optimist.showHelp();
 if (optimist.argv.version) return console.log(version);
@@ -96,11 +106,14 @@ switch (argv._[0]) {
     logger.info('start serving on ' + argv.host + ':' +argv.port);
     break;
   case 'bundle':
-    var output = argv.output || argv.o || '.';
-    var bundler = createBundler(id, argv).bundle.then(function(bundles) {
-      for (var name in bundles)
-        fs.writeFileSync(p.join(output, name), bundles[name]);
-    }).end();
+    var output = argv.output || argv.o || process.stdout;
+    var composer = createComposer(id, argv);
+    if (argv.js)
+      composer.bundleJS().pipe(output)
+    else if (argv.css)
+      composer.bundleCSS().pipe(output)
+    else
+      composer.bundle().pipe(output);
     break;
   default:
     error(argv._[0] ? 'unknown command ' + argv._[0] : 'no command given', true);
