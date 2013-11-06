@@ -110,7 +110,7 @@ switch (argv._[0]) {
     logger.info('start serving on ' + argv.host + ':' +argv.port);
     break;
   case 'bundle':
-    var output = argv.output || argv.o || process.stdout;
+    var output = argv.output ? fs.createWriteStream(argv.output) : process.stdout;
     var composer = createComposer(id, argv);
     if (argv.js)
       composer.bundleJS().pipe(output)
