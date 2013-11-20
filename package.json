@@ -32,7 +32,6 @@
     "react-tools": ">= 0.5.x"
   },
   "dependencies": {
-    "react-app-server-runtime": "git://github.com/andreypopp/react-app-server-runtime",
     "react-app-controller": "git://github.com/andreypopp/react-app-controller",
     "react-app-middleware": "git://github.com/andreypopp/react-app-middleware",
     "react-app-bundler": "git://github.com/andreypopp/react-app-bundler",
