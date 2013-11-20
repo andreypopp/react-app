@@ -70,13 +70,18 @@ if (optimist.argv.version)
   return console.log(require('./package.json').version);
 
 var argv = optimist.argv;
+argv.cssTransform = argv['css-transform'];
+
 var logger = argv.logger = argv.quiet ?
   require('quiet-console') :
   argv.colors ?
   require('better-console') :
   console;
+
 var entry = getEntry();
+
 var app = ReactApp(entry, argv);
+
 app.listen(argv.port, argv.host, function() {
   logger.info('server is listening on', argv.host + ':' + argv.port); 
 });
