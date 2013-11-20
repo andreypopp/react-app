@@ -19,12 +19,16 @@ function createApp(entry, opts) {
   app.get('/assets/bundle.js', bundler.serve(bundle, opts));
 
   if (opts.style) {
-    app.get('/assets/bundle.css', xcss(opts.style, opts));
+    app.get('/assets/bundle.css', xcss(opts.style, {
+      basedir: root,
+      debug: opts.debug,
+      transform: opts.cssTransform
+    }));
+    opts.link = {rel: 'stylesheet', href: '/assets/bundle.css'};
   }
 
   if (opts.assets) {
     app.use('/assets', express.static(path.join(root, opts.assets)));
-    opts.link = {rel: 'stylesheet', href: '/assets/bundle.css'};
   }
 
   opts.meta = {charset: 'utf8'};
