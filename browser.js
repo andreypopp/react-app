@@ -1,2 +1,5 @@
 "use strict";
-module.exports = require('./controller');
+var createApp = require('./controller');
+module.exports = createApp;
+module.exports.createApp = createApp;
+
