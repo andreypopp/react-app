@@ -25,26 +25,23 @@
     "semver": "~2.2.1",
     "jshint": "~2.3.0",
     "mocha": "~1.14.0",
-    "supertest": "~0.8.1"
+    "supertest": "~0.8.1",
+    "react-tools": "~0.5.1"
+  },
+  "peerDependencies": {
+    "react-tools": ">= 0.5.x"
   },
   "dependencies": {
     "react-app-server-runtime": "git://github.com/andreypopp/react-app-server-runtime",
     "react-app-controller": "git://github.com/andreypopp/react-app-controller",
-    "browserify": "~2.35.4",
-    "react-tools": "~0.5.1",
-    "reactify": "~0.4.0",
+    "react-app-middleware": "git://github.com/andreypopp/react-app-middleware",
+    "react-app-bundler": "git://github.com/andreypopp/react-app-bundler",
     "lodash.clonedeep": "~2.3.0",
     "lodash.assign": "~2.3.0",
     "express": "~3.4.4",
-    "connect-browserify": "~0.7.0",
-    "kew": "~0.3.0",
-    "lodash": "~2.3.0",
     "connect-xcss": "~0.1.0",
-    "watchify": "~0.3.0",
     "optimist": "~0.6.0",
     "better-console": "~0.2.2",
-    "react-app-middleware": "git://github.com/andreypopp/react-app-middleware",
-    "react-app-bundler": "git://github.com/andreypopp/react-app-bundler",
     "quiet-console": "~0.1.0",
     "get-callsite-dirname": "~0.1.0"
   }

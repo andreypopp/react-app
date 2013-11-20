@@ -1,6 +1,5 @@
 "use strict";
 
-var ExecutionEnvironment  = require('react-tools/build/modules/ExecutionEnvironment');
 var basicController       = require('react-app-controller');
 var cloneDeep             = require('lodash.cloneDeep');
 var assign                = require('lodash.assign');

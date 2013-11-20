@@ -1,7 +1,6 @@
 "use strict";
 
 var path                = require('path');
-var utils               = require('lodash');
 var express             = require('express');
 var bundler             = require('react-app-bundler');
 var xcss                = require('connect-xcss');
