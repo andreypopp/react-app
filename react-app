@@ -1,0 +1,95 @@
+#!/usr/bin/env node
+"use strict";
+// vim: set ft=javascript:
+
+var fs              = require('fs');
+var ReactApp        = require('./index');
+var optimist        = require('optimist')
+      .usage('$0 [options]')
+      .option('h', {
+        alias: 'help',
+        boolean: true,
+        describe: 'Show this message and exit'
+      })
+      .option('v', {
+        alias: 'version',
+        boolean: true,
+        describe: 'Show version'
+      })
+      .option('q', {
+        alias: 'quiet',
+        boolean: true,
+        default: false,
+        describe: 'Operate in quiet mode'
+      })
+      .option('colors', {
+        boolean: true,
+        default: true,
+        describe: 'Color logging output'
+      })
+      .option('d', {
+        alias: 'debug',
+        boolean: true,
+        default: false,
+        describe: 'Run in debug mode'
+      })
+      .option('p', {
+        alias: 'port',
+        default: 3000,
+        describe: 'Port to use'
+      })
+      .option('host', {
+        default: 'localhost',
+        describe: 'Host to use'
+      })
+      .option('a', {
+        alias: 'assets',
+        describe: 'Serve assets from a directory'
+      })
+      .option('s', {
+        alias: 'styles',
+        describe: 'Serve styles'
+      })
+      .option('render', {
+        describe: 'Render UI on server',
+        default: false,
+        boolean: true
+      })
+      .option('t', {
+        alias: 'transform',
+        describe: 'Apply source transform'
+      })
+      .option('css-transform', {
+        describe: 'Apply CSS source transform'
+      });
+
+if (optimist.argv.help)
+  return optimist.showHelp();
+
+if (optimist.argv.version)
+  return console.log(require('./package.json').version);
+
+var argv = optimist.argv;
+var logger = argv.logger = argv.quiet ?
+  require('quiet-console') :
+  argv.colors ?
+  require('better-console') :
+  console;
+var entry = getEntry();
+var app = ReactApp(entry, argv);
+app.listen(argv.port, argv.host, function() {
+  logger.info('server is listening on', argv.host + ':' + argv.port); 
+});
+
+function error(msg, showHelp) {
+  if (showHelp)
+    optimist.showHelp();
+  logger.error('error:', msg);
+  process.exit(1);
+}
+
+function getEntry() {
+  if (!argv._[0])
+    error('provide entry point as argument', true);
+  return argv._[0];
+}
