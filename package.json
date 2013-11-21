@@ -4,6 +4,9 @@
   "description": "Rapid application development with React",
   "main": "index.js",
   "browser": "browser.js",
+  "bin": {
+    "react-app": "react-app"
+  },
   "scripts": {
     "test": "mocha -R spec specs/*.js"
   },
