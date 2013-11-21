@@ -22,8 +22,8 @@ function createApp(entry, opts) {
 
   app.get('/assets/bundle.js', bundler.serve(bundle, opts));
 
-  if (opts.style) {
-    app.get('/assets/bundle.css', xcss(opts.style, {
+  if (opts.styles) {
+    app.get('/assets/bundle.css', xcss(opts.styles, {
       basedir: root,
       debug: opts.debug,
       transform: opts.cssTransform
