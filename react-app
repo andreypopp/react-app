@@ -70,6 +70,8 @@ if (optimist.argv.version)
   return console.log(require('./package.json').version);
 
 var argv = optimist.argv;
+
+argv.root = process.cwd();
 argv.cssTransform = argv['css-transform'];
 
 var logger = argv.logger = argv.quiet ?
