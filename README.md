@@ -1,5 +1,8 @@
 # react-app
 
+See [react-app-demo][] for an example of a minimal setup to start working with
+`react-app` right away.
+
 A set of conveniences for [React][] to develop applications which
 
   * use HTML5 History API to navigate between pages
@@ -94,3 +97,4 @@ For other options see `react-app --help`:
       --css-transform  Apply CSS source transform
 
 [React]: https://facebook.github.io/react
+[react-app-demo]: https://github.com/andreypopp/react-app-demo
