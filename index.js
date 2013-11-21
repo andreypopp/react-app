@@ -16,6 +16,10 @@ function createApp(entry, opts) {
 
   var app = express();
 
+  if (opts.assets) {
+    app.use('/assets', express.static(path.join(root, opts.assets)));
+  }
+
   app.get('/assets/bundle.js', bundler.serve(bundle, opts));
 
   if (opts.style) {
@@ -25,10 +29,6 @@ function createApp(entry, opts) {
       transform: opts.cssTransform
     }));
     opts.link = {rel: 'stylesheet', href: '/assets/bundle.css'};
-  }
-
-  if (opts.assets) {
-    app.use('/assets', express.static(path.join(root, opts.assets)));
   }
 
   opts.meta = {charset: 'utf8'};
