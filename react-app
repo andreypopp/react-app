@@ -72,6 +72,7 @@ if (optimist.argv.version)
 var argv = optimist.argv;
 
 argv.root = process.cwd();
+argv.watch = argv.debug;
 argv.cssTransform = argv['css-transform'];
 
 var logger = argv.logger = argv.quiet ?
