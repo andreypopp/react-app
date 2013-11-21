@@ -26,6 +26,8 @@ function createApp(entry, opts) {
     app.get('/assets/bundle.css', xcss(opts.styles, {
       basedir: root,
       debug: opts.debug,
+      watch: opts.watch,
+      logger: opts.logger,
       transform: opts.cssTransform
     }));
     opts.link = {rel: 'stylesheet', href: '/assets/bundle.css'};
