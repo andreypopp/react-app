@@ -5,7 +5,7 @@
 var fs              = require('fs');
 var ReactApp        = require('./index');
 var optimist        = require('optimist')
-      .usage('$0 [options]')
+      .usage('react-app [options] <module-id>')
       .option('h', {
         alias: 'help',
         boolean: true,
