@@ -16,9 +16,13 @@ by your following your decisions.
 ## Installation
 
 You need both `react-app` and `react-tools` packages to be installed, the best
-(and the only) way is to use npm:
+(and the only) way is to use npm.
 
-    % npm install react-app react-tools
+The latest version of `react-app` is unreleased yet, you should do
+
+    % npm install andreypopp/react-app react-tools
+
+If you want to experiment with it.
 
 ## Basic usage
 
@@ -56,6 +60,28 @@ Define your application in `ui.jsx`:
 
 then you can serve your app using `react-app` command line utility:
 
-    % react-app --debug ./ui.jsx
+    % ./node_modules/.bin/react-app --render --debug ./ui.jsx
+
+Note the `--debug` flag which will result in watching your code for changes and
+generating source maps for a bundle. The `--render` flag instructs `react-app`
+to pre-render UI on server.
+
+For other options see `react-app --help`:
+
+    react-app [options] <module id>
+
+    Options:
+      -h, --help       Show this message and exit
+      -v, --version    Show version
+      -q, --quiet      Operate in quiet mode          [default: false]
+      --colors         Color logging output           [default: true]
+      -d, --debug      Run in debug mode              [default: false]
+      -p, --port       Port to use                    [default: 3000]
+      --host           Host to use                    [default: "localhost"]
+      -a, --assets     Serve assets from a directory
+      -s, --styles     Serve styles
+      --render         Render UI on server            [default: false]
+      -t, --transform  Apply source transform
+      --css-transform  Apply CSS source transform
 
 [React]: https://facebook.github.io/react
