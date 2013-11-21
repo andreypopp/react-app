@@ -41,7 +41,7 @@
     "lodash.clonedeep": "~2.3.0",
     "lodash.assign": "~2.3.0",
     "express": "~3.4.4",
-    "connect-xcss": "~0.2.0",
+    "connect-xcss": "~0.2.1",
     "optimist": "~0.6.0",
     "better-console": "~0.2.2",
     "quiet-console": "~0.1.0",
