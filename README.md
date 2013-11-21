@@ -56,7 +56,16 @@ Define your application in `ui.jsx`:
     module.exports = ReactApp({
       '/': Main,
       '/about': About
-    })
+    }, {
+      started: function() {
+        window.addEventListener('click', function(e) {
+          if (e.target.tagName === 'A' && e.target.attributes.href) {
+            e.preventDefault();
+            app.navigate(e.target.attributes.href.value);
+          }
+        });
+      }
+    });
 
 then you can serve your app using `react-app` command line utility:
 
