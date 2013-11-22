@@ -1,7 +1,7 @@
 "use strict";
 
 var basicController       = require('react-app-controller');
-var cloneDeep             = require('lodash.cloneDeep');
+var cloneDeep             = require('lodash.clonedeep');
 var assign                = require('lodash.assign');
 
 function createController(routes, opts) {
