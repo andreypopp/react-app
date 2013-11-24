@@ -14,7 +14,7 @@ A set of conveniences for [React][] to develop applications which
 large-scale application development where you need high degree of freedom and
 want to make your own choices. ReactApp is neither a framework nor a library,
 it's is just a set of conveniences which you can accepts, reject or even replace
-by your following your decisions.
+by following your own decisions.
 
 ## Installation
 
