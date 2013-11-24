@@ -57,16 +57,24 @@ Define your application in `ui.jsx`:
     });
 
     module.exports = ReactApp({
-      '/': Main,
-      '/about': About
-    }, {
-      started: function() {
-        window.addEventListener('click', function(e) {
-          if (e.target.tagName === 'A' && e.target.attributes.href) {
-            e.preventDefault();
-            app.navigate(e.target.attributes.href.value);
-          }
-        });
+      routes: {
+        '/': Main,
+        '/about': About
+      },
+
+      onClick: function(e) {
+        if (e.target.tagName === 'A' && e.target.attributes.href) {
+          e.preventDefault();
+          this.navigate(e.target.attributes.href.value);
+        }
+      },
+
+      componentDidMount: function() {
+        window.addEventListener('click', this.onClick);
+      },
+
+      componentWillUnmount: function() {
+        window.removeEventListener('click', this.onClick);
       }
     });
 
