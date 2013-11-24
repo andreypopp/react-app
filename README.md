@@ -106,3 +106,11 @@ For other options see `react-app --help`:
 
 [React]: https://facebook.github.io/react
 [react-app-demo]: https://github.com/andreypopp/react-app-demo
+
+## Modularity
+
+`react-app` is just a thin wrapper on top of [`react-app-controller`][rac] and
+[`react-app-middleware`][ram] packages. Both of them can be used separately.
+
+[rac]: https://github.com/andreypopp/react-app-controller
+[ram]: https://github.com/andreypopp/react-app-middleware
