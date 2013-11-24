@@ -23,7 +23,7 @@ var ControllerInterface = assign({}, Base.ControllerInterface, {
       return cb(err);
     }
 
-    var needData = typeof page.fetchData === 'function' && !req.data;
+    var needData = typeof page.fetchData === 'function' && !this.state.request.data;
 
     if (request.isEqual(this.state.request, req) && !needData)
       return;
