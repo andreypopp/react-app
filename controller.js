@@ -20,7 +20,10 @@ var ControllerInterface = assign({}, Base.ControllerInterface, {
     try {
       page = this.createPageForRequest(req);
     } catch(err) {
-      return cb(err);
+      if (cb)
+        return cb(err)
+      else
+        throw err;
     }
 
     var needData = typeof page.fetchData === 'function' && !this.state.request.data;
@@ -30,7 +33,10 @@ var ControllerInterface = assign({}, Base.ControllerInterface, {
 
     fetchDataForRequest(this, page, req, function(err, req) {
       if (err) {
-        throw err;
+        if (cb)
+          return cb(err)
+        else
+          throw err;
       }
       this.setState({request: req, page: page});
     }.bind(this));
@@ -55,12 +61,13 @@ var ControllerRenderingInterface = assign({}, Base.ControllerRenderingInterface,
     }
 
     fetchDataForRequest(controller, page, req, function(err, req) {
+      if (err) return cb(err);
+
       try {
         React.renderComponentToString(controller, function(markup) {
           cb(null, {markup: markup, request: req});
         });
       } catch (err) {
-        console.log('oops', err);
         cb(err);
       }
     });
