@@ -18,12 +18,14 @@ by following your own decisions.
 
 ## Installation
 
-You need both `react-app` and `react-tools` packages to be installed, the best
+You need both `react-app` and `react` packages to be installed, the best
 (and the only) way is to use npm.
 
 The latest version of `react-app` is unreleased yet, you should do
 
-    % npm install andreypopp/react-app react-tools
+    % npm install \
+        andreypopp/react-app \
+        http://petehunt.net/react/react-0.5.1.tar.gz
 
 If you want to experiment with it.
 
@@ -31,7 +33,7 @@ If you want to experiment with it.
 
 Define your application in `ui.jsx`:
 
-    var React = require('react-tools/build/modules/React');
+    var React = require('react');
     var ReactApp = require('react-app');
 
     var Main = React.createClass({

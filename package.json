@@ -29,10 +29,7 @@
     "jshint": "~2.3.0",
     "mocha": "~1.14.0",
     "supertest": "~0.8.1",
-    "react-tools": "~0.5.1"
-  },
-  "peerDependencies": {
-    "react-tools": ">= 0.5.x"
+    "react": "http://petehunt.net/react/react-0.5.1.tar.gz"
   },
   "dependencies": {
     "react-app-controller": "git://github.com/andreypopp/react-app-controller",

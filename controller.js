@@ -1,7 +1,7 @@
 "use strict";
 
-var React           = require('react-tools/build/modules/React');
-var invariant       = require('react-tools/build/modules/invariant');
+var React           = require('react');
+var invariant       = require('react/lib/invariant');
 var Base            = require('react-app-controller');
 var request         = require('react-app-controller/request');
 var cloneDeep       = require('lodash.clonedeep');
