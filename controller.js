@@ -67,8 +67,8 @@ var ControllerRenderingInterface = assign({}, Base.ControllerRenderingInterface,
         React.renderComponentToString(controller, function(markup) {
           cb(null, {markup: markup, request: req});
         });
-      } catch (err) {
-        cb(err);
+      } catch (e) {
+        cb(e);
       }
     });
   }
