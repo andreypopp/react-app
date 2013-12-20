@@ -29,14 +29,14 @@
     "jshint": "~2.3.0",
     "mocha": "~1.14.0",
     "supertest": "~0.8.1",
-    "react": "http://petehunt.net/react/react-0.5.1.tar.gz"
+    "react": "~0.8.0"
   },
   "dependencies": {
-    "react-app-controller": "git://github.com/andreypopp/react-app-controller",
-    "react-app-middleware": "git://github.com/andreypopp/react-app-middleware",
-    "react-app-bundler": "git://github.com/andreypopp/react-app-bundler",
-    "lodash.clonedeep": "~2.3.0",
-    "lodash.assign": "~2.3.0",
+    "react-app-controller": "~0.1.0",
+    "react-app-middleware": "~0.1.0",
+    "react-app-bundler": "~0.2.0",
+    "lodash.clonedeep": "~2.4.1",
+    "lodash.assign": "~2.4.1",
     "express": "~3.4.4",
     "connect-xcss": "~0.2.1",
     "optimist": "~0.6.0",
