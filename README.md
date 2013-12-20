@@ -19,13 +19,9 @@ by following your own decisions.
 ## Installation
 
 You need both `react-app` and `react` packages to be installed, the best
-(and the only) way is to use npm.
+(and the only) way is to use npm:
 
-The latest version of `react-app` is unreleased yet, you should do
-
-    % npm install \
-        andreypopp/react-app \
-        http://petehunt.net/react/react-0.5.1.tar.gz
+    % npm install react react-app
 
 If you want to experiment with it.
 
