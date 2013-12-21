@@ -44,10 +44,17 @@ Define your application in `ui.jsx`:
     });
 
     var About = React.createClass({
+
+      fetchData: function(req, cb) {
+        console.log('fetching data...');
+        cb(null, {msg: 'Hello'});
+      },
+
       render: function() {
         return (
           <div className="About">
             About
+            <p>data: {this.props.request.data}</p>
             <a href="/">index</a>
           </div>
         )
