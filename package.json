@@ -32,8 +32,8 @@
     "react": "~0.8.0"
   },
   "dependencies": {
-    "react-app-controller": "~0.1.0",
-    "react-app-middleware": "~0.1.0",
+    "react-app-controller": "~0.3.0",
+    "react-app-middleware": "~0.2.0",
     "react-app-bundler": "~0.2.0",
     "lodash.clonedeep": "~2.4.1",
     "lodash.assign": "~2.4.1",
