@@ -1,6 +1,6 @@
 {
   "name": "react-app",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "description": "Rapid application development with React",
   "main": "index.js",
   "browser": "browser.js",
