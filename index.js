@@ -10,7 +10,7 @@ var middleware          = require('react-app-middleware');
 function createApp(entry, opts) {
   opts = Object.create(opts || {});
 
-  var root = opts.root || getCallsiteDirname();
+  var root = opts.root = opts.root || getCallsiteDirname();
 
   var bundle = bundler.create(entry, opts);
 
