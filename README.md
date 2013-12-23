@@ -111,6 +111,7 @@ For other options see `react-app --help`:
 
 [React]: https://facebook.github.io/react
 [react-app-demo]: https://github.com/andreypopp/react-app-demo
+[react-app-express]: https://github.com/andreypopp/react-app-express
 
 ## Modularity
 
