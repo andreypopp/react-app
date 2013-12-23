@@ -1,7 +1,7 @@
 # react-app
 
-See [react-app-demo][] for an example of a minimal setup to start working with
-`react-app` right away.
+See [react-app-express][] or [react-app-demo][] for the examples of using
+`react-app` with Express app and standalone.
 
 A set of conveniences for [React][] to develop applications which
 
