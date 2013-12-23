@@ -65,7 +65,7 @@ var ControllerRenderingInterface = assign({}, Base.ControllerRenderingInterface,
 
       try {
         React.renderComponentToString(controller, function(markup) {
-          cb(null, {markup: markup, request: req});
+          cb(null, {markup: markup, request: req, controller: controller});
         });
       } catch (e) {
         cb(e);
