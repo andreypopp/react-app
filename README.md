@@ -1,5 +1,8 @@
 # react-app
 
+**DEPRECATION WARNING:** This is not maintained anymore, please use
+[react-quickstart](https://github.com/andreypopp/react-quickstart) instead.
+
 See [react-app-express][] or [react-app-demo][] for the examples of using
 `react-app` with Express app and standalone.
 
